@@ -25,5 +25,17 @@ struct logEntry {
     }
 };
 
+struct timeStampCompare {
+    bool operator() (std::pair<int,logEntry>* &rhs, std::pair<int,logEntry>* &lhs) const {
+        if (rhs->second.timeStamp == lhs->second.timeStamp) {
+            if (rhs->second.category == lhs->second.category) {
+                return rhs->first < lhs->first;
+            }
+            else return rhs->second.category < lhs->second.category;
+        }
+        else return rhs->second.timeStamp < lhs->second.timeStamp;
+    }
+};
+
 
 #endif

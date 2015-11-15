@@ -9,6 +9,7 @@
 #include <unordered_map>
 #include <vector>
 #include <cstring>
+#include <algorithm>
 #include "project3.h"
 
 using namespace std;
@@ -19,16 +20,22 @@ int main(int argc, const char * argv[])
     
     ios_base::sync_with_stdio(false);
     
+    bool inOrder = false;
     int counter = 0;
     int counter2 = 0;
     
     string line;
     string command;
+    timeStampCompare comp;
     
     pair<unordered_map<string, logEntry>::iterator,bool> check;
     
     vector<pair<int,logEntry>> masterLog;
     vector<pair<int,logEntry>*> excerpt;
+    
+    vector<pair<string,pair<int,logEntry>*>> timeSearchList;
+    
+    vector<pair<int,logEntry>*> results;
     
     if (strcmp(argv[1],"--help") == 0|| strcmp(argv[1],"-h") == 0) {
         cout << "Use this program to do a variety of search, sort,"
@@ -69,13 +76,17 @@ int main(int argc, const char * argv[])
                 
             }
             else if (command[0] == 'l') {
+                inorder = false;
                 excerpt.clear();
                 cout << "excerpt list cleared" << '\n';
             }
             else if (command[0] == 's') {
-                
+                sort(excerpt.begin(),excerpt.end(),comp);
+                cout << "excerpt list sorted" << '\n';
+                inOrder = true;
             }
             else if (command[0] == 'e') {
+                inOrder = false;
                 string parse = command.substr(2);
                 counter = stoi(parse);
                 pair<int,logEntry>* move;
@@ -87,6 +98,7 @@ int main(int argc, const char * argv[])
                 }
             }
             else if (command[0] == 'b') {
+                inOrder = false;
                 string parse = command.substr(2);
                 counter = stoi(parse);
                 pair<int,logEntry>* move;
@@ -110,9 +122,10 @@ int main(int argc, const char * argv[])
                 
             }
             else if (command[0] == 'a') {
+                inOrder = false;
                 string parse = command.substr(2);
                 counter = stoi(parse);
-                if (counter < excerpt.size()) {
+                if (counter < masterLog.size()) {
                     excerpt.push_back(&masterLog[counter]);
                     cout << "log entry " << counter << " appended" << '\n';
                 }
@@ -125,6 +138,24 @@ int main(int argc, const char * argv[])
                 
             }
             else if (command[0] == 't') {
+                counter2 = 0;
+                string parse = command.substr(2);
+                counter = parse.find('|',0);
+                string start = parse.substr(0,counter);
+                string end = parse.substr(counter + 1,string::npos);
+                if (inOrder == false) {
+                    sort(excerpt.begin(),excerpt.end(),comp);
+                    cout << "excerpt list sorted" << '\n';
+                    inOrder = true;
+                }
+                for (int i = 0; i < excerpt.size(); ++i) {
+                    if (excerpt[i]->second.timeStamp >= start &&
+                        excerpt[i]->second.timeStamp < end) {
+                        ++counter2;
+                        results.push_back(excerpt[i]);
+                    }
+                }
+                cout << counter2 << " entries found" << '\n';
                 
             }
             else cerr << "Invalid command. Try again" << '\n';
