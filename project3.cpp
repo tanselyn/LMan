@@ -16,7 +16,7 @@ using namespace std;
 
 int main(int argc, const char * argv[])
 {
-
+    
     ios_base::sync_with_stdio(false);
     
     int counter = 0;
@@ -32,7 +32,7 @@ int main(int argc, const char * argv[])
     
     if (strcmp(argv[1],"--help") == 0|| strcmp(argv[1],"-h") == 0) {
         cout << "Use this program to do a variety of search, sort,"
-            << " and move operations to a log file" << '\n';
+        << " and move operations to a log file" << '\n';
         exit(0);
     }
     
@@ -53,29 +53,29 @@ int main(int argc, const char * argv[])
         }
         
         cout << "% ";
-        cin >> command;
+        getline(cin,command);
         while (command[0] != 'q') {
             
-            if (command[0] == '#') break;
+            if (command[0] == '#') {}
             
-            else if (command[0] == 'p') == 0) {
+            else if (command[0] == 'p') {
                 for (int i = 0; i < excerpt.size(); ++i) {
                     cout << i << "|" << excerpt[i]->first << "|" << excerpt[i]->
-                        second.timeStamp << "|" << excerpt[i]->second.category << "|"
-                        << excerpt[i]->second.message << '\n';
+                    second.timeStamp << "|" << excerpt[i]->second.category << "|"
+                    << excerpt[i]->second.message << '\n';
                 }
             }
-            else if (command[0] == 'g') == 0) {
+            else if (command[0] == 'g') {
                 
             }
-            else if (command[0] == 'l') == 0) {
+            else if (command[0] == 'l') {
                 excerpt.clear();
                 cout << "excerpt list cleared" << '\n';
             }
-            else if (command[0] == 's') == 0) {
+            else if (command[0] == 's') {
                 
             }
-            else if (command[0] == 'e') == 0) {
+            else if (command[0] == 'e') {
                 string parse = command.substr(2);
                 counter = stoi(parse);
                 pair<int,logEntry>* move;
@@ -86,7 +86,7 @@ int main(int argc, const char * argv[])
                     cout << "excerpt list entry " << counter << " moved" << '\n';
                 }
             }
-            else if (command[0] == 'b') == 0) {
+            else if (command[0] == 'b') {
                 string parse = command.substr(2);
                 counter = stoi(parse);
                 pair<int,logEntry>* move;
@@ -98,7 +98,7 @@ int main(int argc, const char * argv[])
                 }
                 
             }
-            else if (command[0] == 'd') == 0) {
+            else if (command[0] == 'd') {
                 string parse = command.substr(2);
                 counter = stoi(parse);
                 if (counter < excerpt.size()) {
@@ -106,10 +106,10 @@ int main(int argc, const char * argv[])
                     cout << "excerpt list entry " << counter << " deleted" << '\n';
                 }
             }
-            else if (command[0] == 'r') == 0) {
+            else if (command[0] == 'r') {
                 
             }
-            else if (command[0] == 'a') == 0) {
+            else if (command[0] == 'a') {
                 string parse = command.substr(2);
                 counter = stoi(parse);
                 if (counter < excerpt.size()) {
@@ -117,19 +117,19 @@ int main(int argc, const char * argv[])
                     cout << "log entry " << counter << " appended" << '\n';
                 }
             }
-            else if (command[0] == 'k') == 0) {
+            else if (command[0] == 'k') {
                 
             }
-            else if (command[0] == 'c') == 0) {
+            else if (command[0] == 'c') {
                 
                 
             }
-            else if (command[0] == 't') == 0) {
+            else if (command[0] == 't') {
                 
             }
-            else cout << "Invalid command. Try again" << '\n';
+            else cerr << "Invalid command. Try again" << '\n';
             cout << "% ";
-            cin >> command;
+            getline(cin,command);
         }
         
         
@@ -137,4 +137,3 @@ int main(int argc, const char * argv[])
     
     return 0;
 }
-
