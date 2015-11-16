@@ -29,8 +29,7 @@ int main(int argc, const char * argv[])
     string line;
     string command;
     timeStampCompare comp;
-    
-    pair<unordered_map<string,logEntry>::iterator,bool> check;
+    lowerBoundCompare lowerComp;
     
     vector<logEntry> masterLog;
     vector<logEntry*> excerpt;
@@ -273,10 +272,10 @@ int main(int argc, const char * argv[])
                 string end = parse.substr(counter + 1,string::npos);
 
                 vector<logEntry*>::iterator lower = lower_bound
-                            (timeSearchList.begin(),timeSearchList.end(), start);
+                            (timeSearchList.begin(),timeSearchList.end(), start, lowerComp);
                 
                 vector<logEntry*>::iterator upper = lower_bound
-                            (timeSearchList.begin(),timeSearchList.end(), end);
+                            (timeSearchList.begin(),timeSearchList.end(), end, lowerComp);
                 while (lower != upper) {
                     results.push_back(*lower);
                     ++lower;

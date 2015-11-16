@@ -45,5 +45,11 @@ struct timeStampCompare {
     }
 };
 
+struct lowerBoundCompare {
+    bool operator() (logEntry* rhs, std::string &lhs) const {
+        return rhs->timeStamp < lhs;
+    }
+};
+
 
 #endif
