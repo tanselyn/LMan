@@ -18,8 +18,10 @@ struct logEntry {
     std::string lowerCaseCategory;
     std::string lowerCaseMessage;
     
+    int entryID;
+    
     logEntry(): timeStamp("a"), category("a"), message("a"),
-                lowerCaseCategory("a"), lowerCaseMessage("a") {}
+                lowerCaseCategory("a"), lowerCaseMessage("a"), entryID(0) {}
     
     void operator=(const logEntry &other) {
         timeStamp = other.timeStamp;
@@ -27,32 +29,21 @@ struct logEntry {
         message = other.message;
         lowerCaseCategory = other.lowerCaseCategory;
         lowerCaseMessage = other.lowerCaseMessage;
+        entryID = other.entryID;
     }
 };
 
 struct timeStampCompare {
-    bool operator() (std::pair<int,logEntry>* rhs, std::pair<int,logEntry>* lhs) const {
-        if (rhs->second.timeStamp == lhs->second.timeStamp) {
-            if (rhs->second.category == lhs->second.category) {
-                return rhs->first < lhs->first;
+    bool operator() (logEntry* rhs, logEntry* lhs) const {
+        if (rhs->timeStamp == lhs->timeStamp) {
+            if (rhs->category == lhs->category) {
+                return rhs->entryID < lhs->entryID;
             }
-            else return rhs->second.category < lhs->second.category;
+            else return rhs->category < lhs->category;
         }
-        else return rhs->second.timeStamp < lhs->second.timeStamp;
+        else return rhs->timeStamp < lhs->timeStamp;
     }
 };
 
-struct timeSearchCompare {
-    bool operator() (std::pair<std::string,std::pair<int,logEntry>*> &rhs,
-                     std::pair<std::string,std::pair<int,logEntry>*> &lhs) const {
-        if (rhs.first == lhs.first) {
-            if (rhs.second->second.category == lhs.second->second.category) {
-                return rhs.second->first < lhs.second->first;
-            }
-            else return rhs.second->second.category < lhs.second->second.category;
-        }
-        else return rhs.first < lhs.first;
-    }
-};
 
 #endif

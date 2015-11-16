@@ -28,17 +28,16 @@ int main(int argc, const char * argv[])
     
     string line;
     string command;
-    timeStampCompare comp1;
-    timeSearchCompare comp2;
+    timeStampCompare comp;
     
     pair<unordered_map<string,logEntry>::iterator,bool> check;
     
-    vector<pair<int,logEntry>> masterLog;
-    vector<pair<int,logEntry>*> excerpt;
-    vector<pair<int,logEntry>*> results;
+    vector<logEntry> masterLog;
+    vector<logEntry*> excerpt;
+    vector<logEntry*> results;
     vector<string> keywords;
     
-    vector<pair<string,pair<int,logEntry>*>> timeSearchList;
+    vector<logEntry*> timeSearchList;
     unordered_map<string,vector<int>> categorySearchList;
     unordered_map<string,vector<int>> keywordSearchList;
     
@@ -59,6 +58,7 @@ int main(int argc, const char * argv[])
                 counter2 = line.find('|',counter + 1);
                 next.category = line.substr(counter + 1,counter2 - counter - 1);
                 next.message = line.substr(counter2 + 1,string::npos);
+                next.entryID = masterLog.size();
                 for (int i = 0; i < next.category.size(); ++i) {
                     next.lowerCaseCategory += tolower(next.category[i]);
                 }
@@ -66,10 +66,8 @@ int main(int argc, const char * argv[])
                     next.lowerCaseMessage += tolower(next.message[i]);
                 }
                 
-                pair<int,logEntry> add(masterLog.size(),next);
-                masterLog.push_back(add);
-                timeSearchList.push_back(pair<string,pair<int,logEntry>*>(next.timeStamp,
-                                    &masterLog[masterLog.size() - 1]));
+                masterLog.push_back(next);
+                timeSearchList.push_back(&next);
                 
                 unordered_map<string,vector<int>>::iterator location
                     = categorySearchList.find(next.lowerCaseCategory);
@@ -110,7 +108,7 @@ int main(int argc, const char * argv[])
             }
         }
         
-        sort(timeSearchList.begin(),timeSearchList.end(),comp2);
+        sort(timeSearchList.begin(),timeSearchList.end(),comp);
         
         cout << "% ";
         getline(cin,command);
@@ -120,21 +118,21 @@ int main(int argc, const char * argv[])
             
             else if (command[0] == 'p') {
                 for (int i = 0; i < excerpt.size(); ++i) {
-                    cout << i << "|" << excerpt[i]->first << "|" << excerpt[i]->
-                    second.timeStamp << "|" << excerpt[i]->second.category << "|"
-                    << excerpt[i]->second.message << '\n';
+                    cout << i << "|" << excerpt[i]->entryID << "|" << excerpt[i]->
+                    timeStamp << "|" << excerpt[i]->category << "|"
+                    << excerpt[i]->message << '\n';
                 }
             }
             else if (command[0] == 'g') {
                 if (!results.empty()) {
                     if (resultsInOrder == false) {
-                        sort(results.begin(),results.end(),comp1);
+                        sort(results.begin(),results.end(),comp);
                         resultsInOrder = true;
                     }
                     for (int i = 0; i < results.size(); ++i) {
-                        cout << results[i]->first << "|" << results[i]->
-                        second.timeStamp << "|" << results[i]->second.category << "|"
-                        << results[i]->second.message << '\n';
+                        cout << results[i]->entryID << "|" << results[i]->
+                        timeStamp << "|" << results[i]->category << "|"
+                        << results[i]->message << '\n';
                     }
                 }
             }
@@ -145,7 +143,7 @@ int main(int argc, const char * argv[])
             }
             else if (command[0] == 's') {
                 if (inOrder == false) {
-                    sort(excerpt.begin(),excerpt.end(),comp1);
+                    sort(excerpt.begin(),excerpt.end(),comp);
                     cout << "excerpt list sorted" << '\n';
                     inOrder = true;
                 }
@@ -154,9 +152,8 @@ int main(int argc, const char * argv[])
                 inOrder = false;
                 string parse = command.substr(2);
                 counter = stoi(parse);
-                pair<int,logEntry>* move;
                 if (counter < excerpt.size()) {
-                    move = excerpt[counter];
+                    logEntry* move = excerpt[counter];
                     excerpt.erase(excerpt.begin() + counter);
                     excerpt.push_back(move);
                     cout << "excerpt list entry " << counter << " moved" << '\n';
@@ -166,9 +163,8 @@ int main(int argc, const char * argv[])
                 inOrder = false;
                 string parse = command.substr(2);
                 counter = stoi(parse);
-                pair<int,logEntry>* move;
                 if (counter < excerpt.size()) {
-                    move = excerpt[counter];
+                    logEntry* move = excerpt[counter];
                     excerpt.erase(excerpt.begin() + counter);
                     excerpt.insert(excerpt.begin(),move);
                     cout << "excerpt list entry " << counter << " moved" << '\n';
@@ -186,13 +182,14 @@ int main(int argc, const char * argv[])
             else if (command[0] == 'r') {
                 if (!results.empty()) {
                     if (resultsInOrder == false) {
-                        sort(results.begin(),results.end(),comp1);
+                        sort(results.begin(),results.end(),comp);
                         resultsInOrder = true;
                     }
                     for (int i = 0; i < results.size(); ++i) {
                         excerpt.push_back(results[i]);
                     }
                     cout << results.size() << " log entries appended" << '\n';
+                }
             }
             else if (command[0] == 'a') {
                 inOrder = false;
@@ -275,13 +272,13 @@ int main(int argc, const char * argv[])
                 string start = parse.substr(0,counter);
                 string end = parse.substr(counter + 1,string::npos);
 
-                vector<pair<string,pair<int,logEntry>*>>::iterator lower =
-                            lower_bound(timeSearchList.begin(),timeSearchList.end(), start);
+                vector<logEntry*>::iterator lower = lower_bound
+                            (timeSearchList.begin(),timeSearchList.end(), start);
                 
-                vector<pair<string,pair<int,logEntry>*>>::iterator upper =
-                            lower_bound(timeSearchList.begin(),timeSearchList.end(), end);
+                vector<logEntry*>::iterator upper = lower_bound
+                            (timeSearchList.begin(),timeSearchList.end(), end);
                 while (lower != upper) {
-                    results.push_back(lower->second);
+                    results.push_back(*lower);
                     ++lower;
                     ++counter2;
                 }
