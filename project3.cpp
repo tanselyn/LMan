@@ -15,6 +15,22 @@
 
 using namespace std;
 
+vector<logEntry*>::iterator lowerBoundFunc(vector<logEntry*>::iterator first,
+                                vector<logEntry*>::iterator last, const string &val) {
+    vector<logEntry*>::iterator it;
+    int count = distance(first,last);
+    while (count>0)
+    {
+        it = first; int step=count/2; advance (it,step);
+        if ((*it)->timeStamp < val) {
+            first = ++it;
+            count -= step + 1;
+        }
+        else count = step;
+    }
+    return first;
+}
+
 
 int main(int argc, const char * argv[])
 {
@@ -271,11 +287,11 @@ int main(int argc, const char * argv[])
                 string start = parse.substr(0,counter);
                 string end = parse.substr(counter + 1,string::npos);
 
-                vector<logEntry*>::iterator lower = lower_bound
-                            (timeSearchList.begin(),timeSearchList.end(), start, lowerComp);
+                vector<logEntry*>::iterator lower = lowerBoundFunc(timeSearchList.begin(),
+                                            timeSearchList.end(), start);
                 
-                vector<logEntry*>::iterator upper = lower_bound
-                            (timeSearchList.begin(),timeSearchList.end(), end, lowerComp);
+                vector<logEntry*>::iterator upper = lowerBoundFunc(timeSearchList.begin(),
+                                                timeSearchList.end(), end);
                 while (lower != upper) {
                     results.push_back(*lower);
                     ++lower;
