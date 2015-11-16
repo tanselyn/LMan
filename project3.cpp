@@ -44,8 +44,8 @@ int main(int argc, const char * argv[])
     
     string line;
     string command;
+    logEntry next;
     timeStampCompare comp;
-    lowerBoundCompare lowerComp;
     
     vector<logEntry> masterLog;
     vector<logEntry*> excerpt;
@@ -67,7 +67,6 @@ int main(int argc, const char * argv[])
         
         if (myFile.is_open()) {
             while (getline(myFile,line)) {
-                logEntry next;
                 counter = line.find('|',0);
                 next.timeStamp = line.substr(0, counter);
                 counter2 = line.find('|',counter + 1);
@@ -122,6 +121,7 @@ int main(int argc, const char * argv[])
                 }
             }
         }
+        myFile.close();
         
         sort(timeSearchList.begin(),timeSearchList.end(),comp);
         
@@ -233,11 +233,11 @@ int main(int argc, const char * argv[])
                 }
                 vector<int> v(1);
                 vector<int>::iterator intersection = v.begin();
+                unordered_map<string,vector<int>>::iterator location1;
+                unordered_map<string,vector<int>>::iterator location2;
                 for (int i = 0; i < keywords.size(); i += 2) {
-                    unordered_map<string,vector<int>>::iterator location1 =
-                            keywordSearchList.find(keywords[i]);
-                    unordered_map<string,vector<int>>::iterator location2 =
-                            keywordSearchList.find(keywords[i + 1]);
+                    location1 = keywordSearchList.find(keywords[i]);
+                    location2 = keywordSearchList.find(keywords[i + 1]);
                     if (location1 == keywordSearchList.end() || location2 ==
                         keywordSearchList.end()) {
                         resultsExist = false;

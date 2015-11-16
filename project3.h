@@ -20,8 +20,7 @@ struct logEntry {
     
     int entryID;
     
-    logEntry(): timeStamp("a"), category("a"), message("a"),
-                lowerCaseCategory("a"), lowerCaseMessage("a"), entryID(0) {}
+    logEntry(): timeStamp("a"), category("a"), message("a"), entryID(0) {}
     
     void operator=(const logEntry &other) {
         timeStamp = other.timeStamp;
@@ -36,10 +35,10 @@ struct logEntry {
 struct timeStampCompare {
     bool operator() (logEntry* rhs, logEntry* lhs) const {
         if (rhs->timeStamp == lhs->timeStamp) {
-            if (rhs->category == lhs->category) {
+            if (rhs->lowerCaseCategory == lhs->lowerCaseCategory) {
                 return rhs->entryID < lhs->entryID;
             }
-            else return rhs->category < lhs->category;
+            else return rhs->lowerCaseCategory < lhs->lowerCaseCategory;
         }
         else return rhs->timeStamp < lhs->timeStamp;
     }
