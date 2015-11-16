@@ -38,7 +38,7 @@ int main(int argc, const char * argv[])
     vector<pair<int,logEntry>*> results;
     vector<string> keywords;
     
-    vector<pair<string,logEntry*>> timeSearchList;
+    vector<pair<string,pair<int,logEntry>*>> timeSearchList;
     unordered_map<string,vector<int>> categorySearchList;
     unordered_map<string,vector<int>> keywordSearchList;
     
@@ -68,8 +68,8 @@ int main(int argc, const char * argv[])
                 
                 pair<int,logEntry> add(masterLog.size(),next);
                 masterLog.push_back(add);
-                timeSearchList.push_back(pair<string,logEntry*>(next.timeStamp,
-                                    &masterLog[masterLog.size() - 1].second));
+                timeSearchList.push_back(pair<string,pair<int,logEntry>*>(next.timeStamp,
+                                    &masterLog[masterLog.size() - 1]));
                 
                 unordered_map<string,vector<int>>::iterator location
                     = categorySearchList.find(next.lowerCaseCategory);
@@ -267,6 +267,7 @@ int main(int argc, const char * argv[])
                 
             }
             else if (command[0] == 't') {
+                resultsInOrder = true;
                 results.clear();
                 counter2 = 0;
                 string parse = command.substr(2);
@@ -274,13 +275,13 @@ int main(int argc, const char * argv[])
                 string start = parse.substr(0,counter);
                 string end = parse.substr(counter + 1,string::npos);
 
-                vector<pair<string,int>>::iterator lower = lower_bound(timeSearchList.begin(),
-                                                    timeSearchList.end(), start);
+                vector<pair<string,pair<int,logEntry>*>>::iterator lower =
+                            lower_bound(timeSearchList.begin(),timeSearchList.end(), start);
                 
-                vector<pair<string,int>>::iterator upper = lower_bound(timeSearchList.begin(),
-                                                    timeSearchList.end(), end);
+                vector<pair<string,pair<int,logEntry>*>>::iterator upper =
+                            lower_bound(timeSearchList.begin(),timeSearchList.end(), end);
                 while (lower != upper) {
-                    results.push_back(&masterLog[lower->second]);
+                    results.push_back(lower->second);
                     ++lower;
                     ++counter2;
                 }

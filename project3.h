@@ -43,15 +43,15 @@ struct timeStampCompare {
 };
 
 struct timeSearchCompare {
-    bool operator() (std::pair<std::string,logEntry*> &rhs,
-                     std::pair<std::string,logEntry*> &lhs) const {
+    bool operator() (std::pair<std::string,std::pair<int,logEntry>*> &rhs,
+                     std::pair<std::string,std::pair<int,logEntry>*> &lhs) const {
         if (rhs.first == lhs.first) {
-            if (rhs.second->category == lhs.second->category) {
-                return rhs.second < lhs.second;
+            if (rhs.second->second.category == lhs.second->second.category) {
+                return rhs.second->first < lhs.second->first;
             }
-            else return rhs.second->category < lhs.second->category;
+            else return rhs.second->second.category < lhs.second->second.category;
         }
-        else return rhs.second->timeStamp < lhs.second->timeStamp;
+        else return rhs.first < lhs.first;
     }
 };
 
