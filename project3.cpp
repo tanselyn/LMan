@@ -83,11 +83,11 @@ int main(int argc, const char * argv[])
         cout << masterLog.size() << " entries read" << '\n';
         
         for (int i = 0; i < masterLog.size(); ++i) {
-            for (int i = 0; i < masterLog[i].category.size(); ++i) {
-                masterLog[i].lowerCaseCategory += tolower(masterLog[i].category[i]);
+            for (int j = 0; j < masterLog[i].category.size(); ++j) {
+                masterLog[i].lowerCaseCategory += tolower(masterLog[i].category[j]);
             }
-            for (int i = 0; i < masterLog[i].message.size(); ++i) {
-                masterLog[i].lowerCaseMessage += tolower(masterLog[i].message[i]);
+            for (int j = 0; j < masterLog[i].message.size(); ++j) {
+                masterLog[i].lowerCaseMessage += tolower(masterLog[i].message[j]);
             }
         }
         
@@ -186,8 +186,8 @@ int main(int argc, const char * argv[])
                     string word;
                     unordered_map<string,vector<int>>::iterator location;
                     for (int i = 0; i < masterLog.size(); ++i) {
-                        for (int i = 0; i < masterLog[i].lowerCaseCategory.size(); ++i) {
-                            if (!isalnum(masterLog[i].lowerCaseCategory[i])) {
+                        for (int j = 0; j < masterLog[i].lowerCaseCategory.size(); ++j) {
+                            if (!isalnum(masterLog[i].lowerCaseCategory[j])) {
                                 if (!word.empty()) {
                                     location = keywordSearchList.find(word);
                                     if (location != keywordSearchList.end()) {
@@ -197,11 +197,11 @@ int main(int argc, const char * argv[])
                                     word.clear();
                                 }
                             }
-                            else word += masterLog[i].lowerCaseCategory[i];
+                            else word += masterLog[i].lowerCaseCategory[j];
                         }
                     
-                        for (int i = 0; i < masterLog[i].lowerCaseMessage.size(); ++i) {
-                            if (!isalnum(masterLog[i].lowerCaseMessage[i])) {
+                        for (int j = 0; j < masterLog[i].lowerCaseMessage.size(); ++j) {
+                            if (!isalnum(masterLog[i].lowerCaseMessage[j])) {
                                 if (!word.empty()) {
                                     location = keywordSearchList.find(word);
                                     if (location != keywordSearchList.end()) {
@@ -211,7 +211,7 @@ int main(int argc, const char * argv[])
                                     word.clear();
                                 }
                             }
-                            else word += next.lowerCaseMessage[i];
+                            else word += masterLog[i].lowerCaseMessage[j];
                         }
                     }
 
