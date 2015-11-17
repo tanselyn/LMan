@@ -261,14 +261,7 @@ int main(int argc, const char * argv[])
                 auto location = categorySearchList.begin();
                 if (categorySearchList.empty()) {
                     for (int i = 0; i < masterLog.size(); ++i) {
-                        location = categorySearchList.find(masterLog[i].lowerCaseCategory);
-                        if (location != categorySearchList.end()) {
-                            location->second.insert(i);
-                        }
-                        else {
-                            categorySearchList[masterLog[i].lowerCaseCategory];
-                            categorySearchList[masterLog[i].lowerCaseCategory].insert(i);
-                        }
+                        categorySearchList[masterLog[i].lowerCaseCategory].insert(i);
                     }
                     
                 }
