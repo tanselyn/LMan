@@ -8,6 +8,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <set>
 #include <cstring>
 #include <algorithm>
 #include <cctype>
@@ -182,44 +183,29 @@ int main(int argc, const char * argv[])
             }
             else if (command[0] == 'k') {
                 if (keywordSearchList.empty()) {
-                    string word;
-                    unordered_map<string,vector<int>>::iterator location;
                     for (logEntry log : masterLog) {
                         auto indexFirst = log.lowerCaseCategory.begin();
                         auto indexLast = log.lowerCaseCategory.begin();
                         while ((indexFirst = find_if(indexLast,log.lowerCaseCategory.end(),
-                                [](char c) {return isalnum(c);})) != log.lowerCaseCategory.end()) {
+                                                     [](char c) {return isalnum(c);})) != log.lowerCaseCategory.end()) {
                             indexLast = find_if(indexFirst,log.lowerCaseCategory.end(), [](char c)
                                                 {return !isalnum(c);});
-                            word = string(indexFirst,indexLast);
-                            if (!word.empty()) {
-                                location = keywordSearchList.find(word);
-                                if (location != keywordSearchList.end()) {
-                                    location->second.push_back(log.entryID);
-                                }
-                                else {
-                                    keywordSearchList[word];
-                                    keywordSearchList[word].push_back(log.entryID);
-                                }
-                            }
+                            string word(indexFirst,indexLast);
                             
+                            if (!word.empty()) {
+                                keywordSearchList[word].push_back(log.entryID);
+                                
+                            }
                         }
                         indexFirst = log.lowerCaseMessage.begin();
                         indexLast = log.lowerCaseMessage.begin();
                         while ((indexFirst = find_if(indexLast, log.lowerCaseMessage.end(),
-                                [](char c) {return isalnum(c);})) != log.lowerCaseMessage.end()) {
+                                                     [](char c) {return isalnum(c);})) != log.lowerCaseMessage.end()) {
                             indexLast = find_if(indexFirst, log.lowerCaseMessage.end(),
-                                                 [](char c) {return !isalnum(c);});
-                            word = string(indexFirst, indexLast);
+                                                [](char c) {return !isalnum(c);});
+                            string word(indexFirst, indexLast);
                             if (!word.empty()) {
-                                location = keywordSearchList.find(word);
-                                if (location != keywordSearchList.end()) {
-                                    location->second.push_back(log.entryID);
-                                }
-                                else {
-                                    keywordSearchList[word];
-                                    keywordSearchList[word].push_back(log.entryID);
-                                }
+                                keywordSearchList[word].push_back(log.entryID);
                             }
                         }
                     }
@@ -229,41 +215,39 @@ int main(int argc, const char * argv[])
                 results.clear();
                 counter2 = 0;
                 string parse = command.substr(2);
-                string word;
+                vector<int> v;
                 
                 auto indexFirst = parse.begin();
                 auto indexLast = parse.begin();
                 while ((indexFirst = find_if(indexLast,parse.end(),[](char c) {return isalnum(c);}))
-                                    != parse.end()) {
+                       != parse.end()) {
                     indexLast = find_if(indexFirst,parse.end(),[](char c) {return !isalnum(c);});
-                    word = string(indexFirst,indexLast);
-                    keywords.push_back(word);
-                }
-                
-                vector<int> v(1);
-                vector<int>::iterator intersection = v.begin();
-                unordered_map<string,vector<int>>::iterator location1;
-                unordered_map<string,vector<int>>::iterator location2;
-                for (int i = 0; i < keywords.size(); i += 2) {
-                    location1 = keywordSearchList.find(keywords[i]);
-                    location2 = keywordSearchList.find(keywords[i + 1]);
-                    if (location1 == keywordSearchList.end() || location2 ==
-                        keywordSearchList.end()) {
+                    string word(indexFirst,indexLast);
+                    unordered_map<string,vector<int>>::iterator location =
+                                keywordSearchList.find(word);
+                    if (location == keywordSearchList.end()) {
                         resultsExist = false;
                         break;
                     }
                     else {
-                        intersection = (location1->second.begin(),location1->second.end(),
-                                        location2->second.begin(),location2->second.end(),
-                                        intersection);
+                        if (v.empty()) {
+                            v = keywordSearchList[word];
+                        }
+                        vector<int> temp;
+                        (location->second.begin(),location->second.end(),
+                                        v.begin(),v.end(),temp);
+                        if (!temp.empty()) v = temp;
+                        else {
+                            resultsExist = false;
+                            break;
+                        }
                     }
                 }
+                
                 if (resultsExist) {
-                    while (!v.empty()) {
-                        counter2 = v.size();
-                        for (int i = 0; i < v.size(); ++i) {
-                            results.push_back(&masterLog[v[1]]);
-                        }
+                    counter2 = v.size();
+                    for (int i = 0; i < v.size(); ++i) {
+                        results.push_back(&masterLog[v[i]]);
                     }
                 }
                 resultsInOrder = true;
@@ -283,7 +267,7 @@ int main(int argc, const char * argv[])
                             categorySearchList[masterLog[i].lowerCaseCategory].push_back(i);
                         }
                     }
-
+                    
                 }
                 resultsInOrder = false;
                 results.clear();
@@ -308,20 +292,20 @@ int main(int argc, const char * argv[])
                     }
                     sort(timeSearchList.begin(),timeSearchList.end(),comp);
                 }
-        
+                
                 resultsInOrder = true;
                 results.clear();
                 counter2 = 0;
-                string parse = command.substr(2); 
+                string parse = command.substr(2);
                 counter = parse.find('|',0);
                 string start = parse.substr(0,counter);
                 string end = parse.substr(counter + 1,string::npos);
-
+                
                 vector<logEntry*>::iterator lower = lowerBoundFunc(timeSearchList.begin(),
-                                            timeSearchList.end(), start);
+                                                                   timeSearchList.end(), start);
                 
                 vector<logEntry*>::iterator upper = lowerBoundFunc(timeSearchList.begin(),
-                                            timeSearchList.end(), end);
+                                                                   timeSearchList.end(), end);
                 while (lower != upper) {
                     results.push_back(*lower);
                     ++lower;
