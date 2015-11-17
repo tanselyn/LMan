@@ -12,6 +12,7 @@
 #include <cstring>
 #include <algorithm>
 #include <cctype>
+#include <iterator>
 #include "project3.h"
 
 using namespace std;
@@ -228,6 +229,9 @@ int main(int argc, const char * argv[])
                        != parse.end()) {
                     indexLast = find_if(indexFirst,parse.end(),[](char c) {return !isalnum(c);});
                     string word(indexFirst,indexLast);
+                    for (int i = 0; i < word.size(); ++i) {
+                        word[i] = tolower(word[i]);
+                    }
                     auto location = keywordSearchList.find(word);
                     if (location == keywordSearchList.end()) {
                         v.clear();
@@ -239,7 +243,7 @@ int main(int argc, const char * argv[])
                         }
                         set<int> temp;
                         set_intersection(location->second.begin(),location->second.end(),
-                                        v.begin(),v.end(),temp);
+                                        v.begin(),v.end(),inserter(temp,temp.begin()));
                         v = temp;
                         if (v.empty()) break;
                     }
@@ -272,6 +276,9 @@ int main(int argc, const char * argv[])
                 results.clear();
                 counter2 = 0;
                 string parse = command.substr(2);
+                for (int i = 0; i < parse.size(); ++i) {
+                    parse[i] = tolower(parse[i]);
+                }
                 location = categorySearchList.find(parse);
                 if (location != categorySearchList.end()) {
                     counter2 = location->second.size();
