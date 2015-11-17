@@ -150,7 +150,6 @@ int main(int argc, const char * argv[])
                     excerpt.insert(excerpt.begin(),move);
                     cout << "excerpt list entry " << counter << " moved" << '\n';
                 }
-                
             }
             else if (command[0] == 'd') {
                 string parse = command.substr(2);
@@ -191,9 +190,12 @@ int main(int argc, const char * argv[])
                                 if (!word.empty()) {
                                     location = keywordSearchList.find(word);
                                     if (location != keywordSearchList.end()) {
-                                        location->second.push_back(masterLog.size() - 1);
+                                        location->second.push_back(i);
                                     }
-                                    else keywordSearchList[word];
+                                    else {
+                                        keywordSearchList[word];
+                                        keywordSearchList[word].push_back(i);
+                                    }
                                     word.clear();
                                 }
                             }
@@ -205,16 +207,18 @@ int main(int argc, const char * argv[])
                                 if (!word.empty()) {
                                     location = keywordSearchList.find(word);
                                     if (location != keywordSearchList.end()) {
-                                        location->second.push_back(masterLog.size() - 1);
+                                        location->second.push_back(i);
                                     }
-                                    else keywordSearchList[word];
+                                    else {
+                                        keywordSearchList[word];
+                                        keywordSearchList[word].push_back(i);
+                                    }
                                     word.clear();
                                 }
                             }
                             else word += masterLog[i].lowerCaseMessage[j];
                         }
                     }
-
                 }
                 resultsInOrder = false;
                 bool resultsExist = true;
@@ -262,15 +266,16 @@ int main(int argc, const char * argv[])
                 cout << counter2 << " entries found" << '\n';
             }
             else if (command[0] == 'c') {
+                unordered_map<string,vector<int>>::iterator location;
                 if (categorySearchList.empty()) {
-                    unordered_map<string,vector<int>>::iterator location;
                     for (int i = 0; i < masterLog.size(); ++i) {
                         location = categorySearchList.find(masterLog[i].lowerCaseCategory);
                         if (location != categorySearchList.end()) {
-                            location->second.push_back(masterLog.size() - 1);
+                            location->second.push_back(i);
                         }
                         else {
                             categorySearchList[masterLog[i].lowerCaseCategory];
+                            categorySearchList[masterLog[i].lowerCaseCategory].push_back(i);
                         }
                     }
 
@@ -279,12 +284,12 @@ int main(int argc, const char * argv[])
                 results.clear();
                 counter2 = 0;
                 string parse = command.substr(2);
-                unordered_map<string,vector<int>>::iterator location = categorySearchList.find(parse);
+                location = categorySearchList.find(parse);
                 if (location != categorySearchList.end()) {
                     counter2 = location->second.size();
-                }
-                for (int i = 0; i < location->second.size(); ++i) {
-                    results.push_back(&masterLog[location->second[i]]);
+                    for (int i = 0; i < location->second.size(); ++i) {
+                        results.push_back(&masterLog[location->second[i]]);
+                    }
                 }
                 
                 cout << counter2 << " entries found" << '\n';
