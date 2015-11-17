@@ -73,57 +73,23 @@ int main(int argc, const char * argv[])
                 next.category = line.substr(counter + 1,counter2 - counter - 1);
                 next.message = line.substr(counter2 + 1,string::npos);
                 next.entryID = masterLog.size();
-                for (int i = 0; i < next.category.size(); ++i) {
-                    next.lowerCaseCategory += tolower(next.category[i]);
-                }
-                for (int i = 0; i < next.message.size(); ++i) {
-                    next.lowerCaseMessage += tolower(next.message[i]);
-                }
                 
                 masterLog.push_back(next);
-                timeSearchList.push_back(&next);
                 
-                unordered_map<string,vector<int>>::iterator location
-                    = categorySearchList.find(next.lowerCaseCategory);
-                if (location != categorySearchList.end()) {
-                    location->second.push_back(masterLog.size() - 1);
-                }
-                else {
-                    categorySearchList[next.lowerCaseCategory];
-                }
-                string word;
-                for (int i = 0; i < next.lowerCaseCategory.size(); ++i) {
-                    if (!isalnum(next.lowerCaseCategory[i])) {
-                        if (!word.empty()) {
-                            location = keywordSearchList.find(word);
-                            if (location != keywordSearchList.end()) {
-                                location->second.push_back(masterLog.size() - 1);
-                            }
-                            else keywordSearchList[word];
-                            word.clear();
-                        }
-                    }
-                    else word += next.lowerCaseCategory[i];
-                }
-                
-                for (int i = 0; i < next.lowerCaseMessage.size(); ++i) {
-                    if (!isalnum(next.lowerCaseMessage[i])) {
-                        if (!word.empty()) {
-                            location = keywordSearchList.find(word);
-                            if (location != keywordSearchList.end()) {
-                                location->second.push_back(masterLog.size() - 1);
-                            }
-                            else keywordSearchList[word];
-                            word.clear();
-                        }
-                    }
-                    else word += next.lowerCaseMessage[i];
-                }
             }
         }
         myFile.close();
         
-        sort(timeSearchList.begin(),timeSearchList.end(),comp);
+        cout << masterLog.size() << " entries read" << '\n';
+        
+        for (int i = 0; i < masterLog.size(); ++i) {
+            for (int i = 0; i < masterLog[i].category.size(); ++i) {
+                masterLog[i].lowerCaseCategory += tolower(masterLog[i].category[i]);
+            }
+            for (int i = 0; i < masterLog[i].message.size(); ++i) {
+                masterLog[i].lowerCaseMessage += tolower(masterLog[i].message[i]);
+            }
+        }
         
         cout << "% ";
         getline(cin,command);
@@ -216,6 +182,40 @@ int main(int argc, const char * argv[])
                 }
             }
             else if (command[0] == 'k') {
+                if (keywordSearchList.empty()) {
+                    string word;
+                    unordered_map<string,vector<int>>::iterator location;
+                    for (int i = 0; i < masterLog.size(); ++i) {
+                        for (int i = 0; i < masterLog[i].lowerCaseCategory.size(); ++i) {
+                            if (!isalnum(masterLog[i].lowerCaseCategory[i])) {
+                                if (!word.empty()) {
+                                    location = keywordSearchList.find(word);
+                                    if (location != keywordSearchList.end()) {
+                                        location->second.push_back(masterLog.size() - 1);
+                                    }
+                                    else keywordSearchList[word];
+                                    word.clear();
+                                }
+                            }
+                            else word += masterLog[i].lowerCaseCategory[i];
+                        }
+                    
+                        for (int i = 0; i < masterLog[i].lowerCaseMessage.size(); ++i) {
+                            if (!isalnum(masterLog[i].lowerCaseMessage[i])) {
+                                if (!word.empty()) {
+                                    location = keywordSearchList.find(word);
+                                    if (location != keywordSearchList.end()) {
+                                        location->second.push_back(masterLog.size() - 1);
+                                    }
+                                    else keywordSearchList[word];
+                                    word.clear();
+                                }
+                            }
+                            else word += next.lowerCaseMessage[i];
+                        }
+                    }
+
+                }
                 resultsInOrder = false;
                 bool resultsExist = true;
                 results.clear();
@@ -262,6 +262,19 @@ int main(int argc, const char * argv[])
                 cout << counter2 << " entries found" << '\n';
             }
             else if (command[0] == 'c') {
+                if (categorySearchList.empty()) {
+                    unordered_map<string,vector<int>>::iterator location;
+                    for (int i = 0; i < masterLog.size(); ++i) {
+                        location = categorySearchList.find(masterLog[i].lowerCaseCategory);
+                        if (location != categorySearchList.end()) {
+                            location->second.push_back(masterLog.size() - 1);
+                        }
+                        else {
+                            categorySearchList[masterLog[i].lowerCaseCategory];
+                        }
+                    }
+
+                }
                 resultsInOrder = false;
                 results.clear();
                 counter2 = 0;
@@ -279,10 +292,17 @@ int main(int argc, const char * argv[])
                 
             }
             else if (command[0] == 't') {
+                if (timeSearchList.empty()) {
+                    for (int i = 0; i < masterLog.size(); ++i) {
+                        timeSearchList.push_back(&masterLog[i]);
+                    }
+                    sort(timeSearchList.begin(),timeSearchList.end(),comp);
+                }
+        
                 resultsInOrder = true;
                 results.clear();
                 counter2 = 0;
-                string parse = command.substr(2);
+                string parse = command.substr(2); 
                 counter = parse.find('|',0);
                 string start = parse.substr(0,counter);
                 string end = parse.substr(counter + 1,string::npos);
@@ -291,7 +311,7 @@ int main(int argc, const char * argv[])
                                             timeSearchList.end(), start);
                 
                 vector<logEntry*>::iterator upper = lowerBoundFunc(timeSearchList.begin(),
-                                                timeSearchList.end(), end);
+                                            timeSearchList.end(), end);
                 while (lower != upper) {
                     results.push_back(*lower);
                     ++lower;
