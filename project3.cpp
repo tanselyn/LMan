@@ -40,7 +40,6 @@ int main(int argc, const char * argv[])
     ios_base::sync_with_stdio(false);
     
     bool inOrder = false;
-    bool resultsInOrder = false;
     int counter = 0;
     int counter2 = 0;
     
@@ -55,8 +54,8 @@ int main(int argc, const char * argv[])
     vector<string> keywords;
     
     vector<logEntry*> timeSearchList;
-    unordered_map<string,set<int>> categorySearchList;
-    unordered_map<string,set<int>> keywordSearchList;
+    unordered_map<string,set<logEntry*,timeStampCompare>> categorySearchList;
+    unordered_map<string,set<logEntry*,timeStampCompare>> keywordSearchList;
     
     if (strcmp(argv[1],"--help") == 0|| strcmp(argv[1],"-h") == 0) {
         cout << "Use this program to do a variety of search, sort,"
@@ -108,10 +107,6 @@ int main(int argc, const char * argv[])
             }
             else if (command[0] == 'g') {
                 if (!results.empty()) {
-                    if (resultsInOrder == false) {
-                        sort(results.begin(),results.end(),comp);
-                        resultsInOrder = true;
-                    }
                     for (int i = 0; i < results.size(); ++i) {
                         cout << results[i]->entryID << "|" << results[i]->
                         timeStamp << "|" << results[i]->category << "|"
@@ -167,10 +162,6 @@ int main(int argc, const char * argv[])
             }
             else if (command[0] == 'r') {
                 if (!results.empty()) {
-                    if (resultsInOrder == false) {
-                        sort(results.begin(),results.end(),comp);
-                        resultsInOrder = true;
-                    }
                     for (int i = 0; i < results.size(); ++i) {
                         excerpt.push_back(results[i]);
                     }
@@ -190,38 +181,39 @@ int main(int argc, const char * argv[])
             }
             else if (command[0] == 'k') {
                 if (keywordSearchList.empty()) {
-                    for (logEntry log : masterLog) {
-                        auto indexFirst = log.lowerCaseCategory.begin();
-                        auto indexLast = log.lowerCaseCategory.begin();
-                        while ((indexFirst = find_if(indexLast,log.lowerCaseCategory.end(),
-                                                     [](char c) {return isalnum(c);})) != log.lowerCaseCategory.end()) {
-                            indexLast = find_if(indexFirst,log.lowerCaseCategory.end(), [](char c)
-                                                {return !isalnum(c);});
+                    for (int i = i; i < masterLog.size(); ++i) {
+                        auto indexFirst = masterLog[i].lowerCaseCategory.begin();
+                        auto indexLast = masterLog[i].lowerCaseCategory.begin();
+                        while ((indexFirst = find_if(indexLast,masterLog[i].lowerCaseCategory.end(),
+                                                     [](char c) {return isalnum(c);})) !=
+                                                      masterLog[i].lowerCaseCategory.end()) {
+                            indexLast = find_if(indexFirst,masterLog[i].lowerCaseCategory.end(),
+                                                    [](char c) {return !isalnum(c);});
                             string word(indexFirst,indexLast);
                             
                             if (!word.empty()) {
-                                keywordSearchList[word].insert(log.entryID);
+                                keywordSearchList[word].insert(&masterLog[i]);
                                 
                             }
                         }
-                        indexFirst = log.lowerCaseMessage.begin();
-                        indexLast = log.lowerCaseMessage.begin();
-                        while ((indexFirst = find_if(indexLast, log.lowerCaseMessage.end(),
-                                                     [](char c) {return isalnum(c);})) != log.lowerCaseMessage.end()) {
-                            indexLast = find_if(indexFirst, log.lowerCaseMessage.end(),
+                        indexFirst = masterLog[i].lowerCaseMessage.begin();
+                        indexLast = masterLog[i].lowerCaseMessage.begin();
+                        while ((indexFirst = find_if(indexLast,masterLog[i].lowerCaseMessage.end(),
+                                                     [](char c) {return isalnum(c);})) !=
+                                                     masterLog[i].lowerCaseMessage.end()) {
+                            indexLast = find_if(indexFirst, masterLog[i].lowerCaseMessage.end(),
                                                 [](char c) {return !isalnum(c);});
                             string word(indexFirst, indexLast);
                             if (!word.empty()) {
-                                keywordSearchList[word].insert(log.entryID);
+                                keywordSearchList[word].insert(&masterLog[i]);
                             }
                         }
                     }
                 }
-                resultsInOrder = false;
                 results.clear();
                 counter2 = 0;
                 string parse = command.substr(2);
-                set<int> v;
+                set<logEntry*,timeStampCompare> v;
                 
                 auto indexFirst = parse.begin();
                 auto indexLast = parse.begin();
@@ -241,19 +233,19 @@ int main(int argc, const char * argv[])
                         if (v.empty()) {
                             v = keywordSearchList[word];
                         }
-                        set<int> temp;
+                        set<logEntry*,timeStampCompare> temp;
                         set_intersection(location->second.begin(),location->second.end(),
-                                        v.begin(),v.end(),inserter(temp,temp.begin()));
+                                        v.begin(),v.end(),inserter(temp,temp.begin()),
+                                         comp);
                         v = temp;
                         if (v.empty()) break;
                     }
                 }
                 
                 counter2 = v.size();
-                for (int a : v) {
-                    results.push_back(&masterLog[a]);
+                for (logEntry* a : v) {
+                    results.push_back(a);
                 }
-                resultsInOrder = true;
                 
                 cout << counter2 << " entries found" << '\n';
             }
@@ -261,11 +253,11 @@ int main(int argc, const char * argv[])
                 auto location = categorySearchList.begin();
                 if (categorySearchList.empty()) {
                     for (int i = 0; i < masterLog.size(); ++i) {
-                        categorySearchList[masterLog[i].lowerCaseCategory].insert(i);
+                        categorySearchList[masterLog[i].lowerCaseCategory].insert
+                                (&masterLog[i]);
                     }
                     
                 }
-                resultsInOrder = false;
                 results.clear();
                 counter2 = 0;
                 string parse = command.substr(2);
@@ -275,8 +267,8 @@ int main(int argc, const char * argv[])
                 location = categorySearchList.find(parse);
                 if (location != categorySearchList.end()) {
                     counter2 = location->second.size();
-                    for (int a : location->second) {
-                        results.push_back(&masterLog[a]);
+                    for (auto a : location->second) {
+                        results.push_back(a);
                     }
                 }
                 
@@ -292,7 +284,6 @@ int main(int argc, const char * argv[])
                     sort(timeSearchList.begin(),timeSearchList.end(),comp);
                 }
                 
-                resultsInOrder = true;
                 results.clear();
                 counter2 = 0;
                 string parse = command.substr(2);
