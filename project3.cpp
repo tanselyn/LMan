@@ -68,12 +68,12 @@ int main(int argc, const char * argv[])
         
         if (myFile.is_open()) {
             while (getline(myFile,line)) {
-                counter = line.find('|',0);
+                counter = (int)line.find('|',0);
                 next.timeStamp = line.substr(0, counter);
-                counter2 = line.find('|',counter + 1);
+                counter2 = (int)line.find('|',counter + 1);
                 next.category = line.substr(counter + 1,counter2 - counter - 1);
                 next.message = line.substr(counter2 + 1,string::npos);
-                next.entryID = masterLog.size();
+                next.entryID = (int)masterLog.size();
                 
                 masterLog.push_back(next);
                 
@@ -142,7 +142,7 @@ int main(int argc, const char * argv[])
             else if (command[0] == 'b') {
                 inOrder = false;
                 string parse = command.substr(2);
-                counter = stoi(parse);
+                counter = (int)stoi(parse);
                 if (counter < excerpt.size()) {
                     logEntry* move = excerpt[counter];
                     excerpt.erase(excerpt.begin() + counter);
@@ -181,7 +181,7 @@ int main(int argc, const char * argv[])
             }
             else if (command[0] == 'k') {
                 if (keywordSearchList.empty()) {
-                    for (int i = i; i < masterLog.size(); ++i) {
+                    for (int i = 0; i < (int)masterLog.size(); ++i) {
                         auto indexFirst = masterLog[i].lowerCaseCategory.begin();
                         auto indexLast = masterLog[i].lowerCaseCategory.begin();
                         while ((indexFirst = find_if(indexLast,masterLog[i].lowerCaseCategory.end(),
@@ -242,7 +242,7 @@ int main(int argc, const char * argv[])
                     }
                 }
                 
-                counter2 = v.size();
+                counter2 = (int)v.size();
                 for (logEntry* a : v) {
                     results.push_back(a);
                 }
@@ -266,7 +266,7 @@ int main(int argc, const char * argv[])
                 }
                 location = categorySearchList.find(parse);
                 if (location != categorySearchList.end()) {
-                    counter2 = location->second.size();
+                    counter2 = (int)location->second.size();
                     for (auto a : location->second) {
                         results.push_back(a);
                     }
@@ -287,7 +287,7 @@ int main(int argc, const char * argv[])
                 results.clear();
                 counter2 = 0;
                 string parse = command.substr(2);
-                counter = parse.find('|',0);
+                counter = (int)parse.find('|',0);
                 string start = parse.substr(0,counter);
                 string end = parse.substr(counter + 1,string::npos);
                 if (start.size() == 14 && end.size() == 14) {
