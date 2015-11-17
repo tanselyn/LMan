@@ -54,8 +54,8 @@ int main(int argc, const char * argv[])
     vector<string> keywords;
     
     vector<logEntry*> timeSearchList;
-    unordered_map<string,vector<int>> categorySearchList;
-    unordered_map<string,vector<int>> keywordSearchList;
+    unordered_map<string,set<int>> categorySearchList;
+    unordered_map<string,set<int>> keywordSearchList;
     
     if (strcmp(argv[1],"--help") == 0|| strcmp(argv[1],"-h") == 0) {
         cout << "Use this program to do a variety of search, sort,"
@@ -117,6 +117,7 @@ int main(int argc, const char * argv[])
                         << results[i]->message << '\n';
                     }
                 }
+                else cerr << "Error: Invalid command" << '\n';
             }
             else if (command[0] == 'l') {
                 inOrder = false;
@@ -140,6 +141,7 @@ int main(int argc, const char * argv[])
                     excerpt.push_back(move);
                     cout << "excerpt list entry " << counter << " moved" << '\n';
                 }
+                else cerr << "Error: Invalid command" << '\n';
             }
             else if (command[0] == 'b') {
                 inOrder = false;
@@ -151,6 +153,7 @@ int main(int argc, const char * argv[])
                     excerpt.insert(excerpt.begin(),move);
                     cout << "excerpt list entry " << counter << " moved" << '\n';
                 }
+                else cerr << "Error: Invalid command" << '\n';
             }
             else if (command[0] == 'd') {
                 string parse = command.substr(2);
@@ -159,6 +162,7 @@ int main(int argc, const char * argv[])
                     excerpt.erase(excerpt.begin() + counter);
                     cout << "excerpt list entry " << counter << " deleted" << '\n';
                 }
+                else cerr << "Error: Invalid command" << '\n';
             }
             else if (command[0] == 'r') {
                 if (!results.empty()) {
@@ -171,6 +175,7 @@ int main(int argc, const char * argv[])
                     }
                     cout << results.size() << " log entries appended" << '\n';
                 }
+                else cerr << "Error: Invalid command" << '\n';
             }
             else if (command[0] == 'a') {
                 inOrder = false;
@@ -180,6 +185,7 @@ int main(int argc, const char * argv[])
                     excerpt.push_back(&masterLog[counter]);
                     cout << "log entry " << counter << " appended" << '\n';
                 }
+                else cerr << "Error: Invalid command" << '\n';
             }
             else if (command[0] == 'k') {
                 if (keywordSearchList.empty()) {
@@ -193,7 +199,7 @@ int main(int argc, const char * argv[])
                             string word(indexFirst,indexLast);
                             
                             if (!word.empty()) {
-                                keywordSearchList[word].push_back(log.entryID);
+                                keywordSearchList[word].insert(log.entryID);
                                 
                             }
                         }
@@ -205,17 +211,16 @@ int main(int argc, const char * argv[])
                                                 [](char c) {return !isalnum(c);});
                             string word(indexFirst, indexLast);
                             if (!word.empty()) {
-                                keywordSearchList[word].push_back(log.entryID);
+                                keywordSearchList[word].insert(log.entryID);
                             }
                         }
                     }
                 }
                 resultsInOrder = false;
-                bool resultsExist = true;
                 results.clear();
                 counter2 = 0;
                 string parse = command.substr(2);
-                vector<int> v;
+                set<int> v;
                 
                 auto indexFirst = parse.begin();
                 auto indexLast = parse.begin();
@@ -223,48 +228,42 @@ int main(int argc, const char * argv[])
                        != parse.end()) {
                     indexLast = find_if(indexFirst,parse.end(),[](char c) {return !isalnum(c);});
                     string word(indexFirst,indexLast);
-                    unordered_map<string,vector<int>>::iterator location =
-                                keywordSearchList.find(word);
+                    auto location = keywordSearchList.find(word);
                     if (location == keywordSearchList.end()) {
-                        resultsExist = false;
+                        v.clear();
                         break;
                     }
                     else {
                         if (v.empty()) {
                             v = keywordSearchList[word];
                         }
-                        vector<int> temp;
-                        (location->second.begin(),location->second.end(),
+                        set<int> temp;
+                        set_intersection(location->second.begin(),location->second.end(),
                                         v.begin(),v.end(),temp);
-                        if (!temp.empty()) v = temp;
-                        else {
-                            resultsExist = false;
-                            break;
-                        }
+                        v = temp;
+                        if (v.empty()) break;
                     }
                 }
                 
-                if (resultsExist) {
-                    counter2 = v.size();
-                    for (int i = 0; i < v.size(); ++i) {
-                        results.push_back(&masterLog[v[i]]);
-                    }
+                counter2 = v.size();
+                for (int a : v) {
+                    results.push_back(&masterLog[a]);
                 }
                 resultsInOrder = true;
                 
                 cout << counter2 << " entries found" << '\n';
             }
             else if (command[0] == 'c') {
-                unordered_map<string,vector<int>>::iterator location;
+                auto location = categorySearchList.begin();
                 if (categorySearchList.empty()) {
                     for (int i = 0; i < masterLog.size(); ++i) {
                         location = categorySearchList.find(masterLog[i].lowerCaseCategory);
                         if (location != categorySearchList.end()) {
-                            location->second.push_back(i);
+                            location->second.insert(i);
                         }
                         else {
                             categorySearchList[masterLog[i].lowerCaseCategory];
-                            categorySearchList[masterLog[i].lowerCaseCategory].push_back(i);
+                            categorySearchList[masterLog[i].lowerCaseCategory].insert(i);
                         }
                     }
                     
@@ -276,8 +275,8 @@ int main(int argc, const char * argv[])
                 location = categorySearchList.find(parse);
                 if (location != categorySearchList.end()) {
                     counter2 = location->second.size();
-                    for (int i = 0; i < location->second.size(); ++i) {
-                        results.push_back(&masterLog[location->second[i]]);
+                    for (int a : location->second) {
+                        results.push_back(&masterLog[a]);
                     }
                 }
                 
@@ -300,21 +299,23 @@ int main(int argc, const char * argv[])
                 counter = parse.find('|',0);
                 string start = parse.substr(0,counter);
                 string end = parse.substr(counter + 1,string::npos);
+                if (start.size() == 14 && end.size() == 14) {
                 
-                vector<logEntry*>::iterator lower = lowerBoundFunc(timeSearchList.begin(),
-                                                                   timeSearchList.end(), start);
+                    vector<logEntry*>::iterator lower = lowerBoundFunc(timeSearchList.begin(),
+                                                            timeSearchList.end(), start);
                 
-                vector<logEntry*>::iterator upper = lowerBoundFunc(timeSearchList.begin(),
-                                                                   timeSearchList.end(), end);
-                while (lower != upper) {
-                    results.push_back(*lower);
-                    ++lower;
-                    ++counter2;
+                    vector<logEntry*>::iterator upper = lowerBoundFunc(timeSearchList.begin(),
+                                                            timeSearchList.end(), end);
+                    while (lower != upper) {
+                        results.push_back(*lower);
+                        ++lower;
+                        ++counter2;
+                    }
+                    cout << counter2 << " entries found" << '\n';
                 }
-                cout << counter2 << " entries found" << '\n';
-                
+                else cerr << "Error: Invalid command" << '\n';
             }
-            else cerr << "Invalid command. Try again" << '\n';
+            else cerr << "Error: Invalid command" << '\n';
             cout << "% ";
             getline(cin,command);
         }
