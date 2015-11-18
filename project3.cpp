@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -23,6 +24,8 @@ int main(int argc, const char * argv[])
     ios_base::sync_with_stdio(false);
     
     argc = argc;
+    
+    ostringstream os;
     
     bool inOrder = false;
     bool previousSearch = false;
@@ -45,7 +48,7 @@ int main(int argc, const char * argv[])
     unordered_map<string,vector<int>> keywordSearchList;
     
     if (strcmp(argv[1],"--help") == 0|| strcmp(argv[1],"-h") == 0) {
-        cout << "Use this program to do a variety of search, sort,"
+        os << "Use this program to do a variety of search, sort,"
         << " and move operations to a log file" << '\n';
         exit(0);
     }
@@ -68,7 +71,7 @@ int main(int argc, const char * argv[])
         }
         myFile.close();
         
-        cout << masterLog.size() << " entries read" << '\n';
+        os << masterLog.size() << " entries read" << '\n';
         
         for (int i = 0; i < (int)masterLog.size(); ++i) {
             for (int j = 0; j < (int)masterLog[i].category.size(); ++j) {
@@ -80,7 +83,7 @@ int main(int argc, const char * argv[])
         }
         sort(masterLog.begin(),masterLog.end(),comp);
         
-        cout << "% ";
+        os << "% ";
         getline(cin,command);
         while (true) {
             
@@ -88,15 +91,25 @@ int main(int argc, const char * argv[])
             else if (command[0] == '#') {}
             else if (command[0] == 'p') {
                 for (int i = 0; i < (int)excerpt.size(); ++i) {
-                    cout << i << "|" << masterLog[excerpt[i]].entryID << "|"
+                    os << i << "|" << masterLog[excerpt[i]].entryID << "|"
                     << masterLog[excerpt[i]].timeStamp << "|" << masterLog[excerpt[i]].
                     category << "|" << masterLog[excerpt[i]].message << '\n';
                 }
             }
             else if (command[0] == 'g') {
-                if (previousSearch) {
+                if (timeSearch) {
+                    if (!results.empty()) {
+                        while (results[0] != results [1]) {
+                            os << masterLog[results[0]].entryID << "|" << masterLog[results[0]].
+                            timeStamp << "|" << masterLog[results[0]].category << "|"
+                            << masterLog[results[0]].message << '\n';
+                            ++results[0];
+                        }
+                    }
+                }
+                else if (previousSearch) {
                     for (int i = 0; i < (int)results.size(); ++i) {
-                        cout << masterLog[results[i]].entryID << "|" << masterLog[results[i]].
+                        os << masterLog[results[i]].entryID << "|" << masterLog[results[i]].
                         timeStamp << "|" << masterLog[results[i]].category << "|"
                         << masterLog[results[i]].message << '\n';
                     }
@@ -106,14 +119,14 @@ int main(int argc, const char * argv[])
             else if (command[0] == 'l') {
                 inOrder = false;
                 excerpt.clear();
-                cout << "excerpt list cleared" << '\n';
+                os << "excerpt list cleared" << '\n';
             }
             else if (command[0] == 's') {
                 if (inOrder == false) {
                     sort(excerpt.begin(),excerpt.end());
                     inOrder = true;
                 }
-                cout << "excerpt list sorted" << '\n';
+                os << "excerpt list sorted" << '\n';
             }
             else if (command[0] == 'e') {
                 inOrder = false;
@@ -123,7 +136,7 @@ int main(int argc, const char * argv[])
                     int move = excerpt[counter];
                     excerpt.erase(excerpt.begin() + counter);
                     excerpt.push_back(move);
-                    cout << "excerpt list entry " << counter << " moved" << '\n';
+                    os << "excerpt list entry " << counter << " moved" << '\n';
                 }
                 else cerr << "Error: Invalid command" << '\n';
             }
@@ -135,7 +148,7 @@ int main(int argc, const char * argv[])
                     int move = excerpt[counter];
                     excerpt.erase(excerpt.begin() + counter);
                     excerpt.insert(excerpt.begin(),move);
-                    cout << "excerpt list entry " << counter << " moved" << '\n';
+                    os << "excerpt list entry " << counter << " moved" << '\n';
                 }
                 else cerr << "Error: Invalid command" << '\n';
             }
@@ -144,26 +157,26 @@ int main(int argc, const char * argv[])
                 counter = stoi(parse);
                 if (counter < (int)excerpt.size()) {
                     excerpt.erase(excerpt.begin() + counter);
-                    cout << "excerpt list entry " << counter << " deleted" << '\n';
+                    os << "excerpt list entry " << counter << " deleted" << '\n';
                 }
                 else cerr << "Error: Invalid command" << '\n';
             }
             else if (command[0] == 'r') {
                 if (timeSearch) {
                     if (!results.empty()) {
-                        cout << results[1] - results[0] << " log entries appended" << '\n';
+                        os << results[1] - results[0] << " log entries appended" << '\n';
                         while (results[0] != results [1]) {
                             excerpt.push_back(results[0]);
                             ++results[0];
                         }
                     }
-                    else cout << results.size() << " log entries appended" << '\n';
+                    else os << results.size() << " log entries appended" << '\n';
                 }
-                if (previousSearch) {
+                else if (previousSearch) {
                     for (int i = 0; i < (int)results.size(); ++i) {
                         excerpt.push_back(results[i]);
                     }
-                    cout << results.size() << " log entries appended" << '\n';
+                    os << results.size() << " log entries appended" << '\n';
                 }
                 else cerr << "Error: Invalid command" << '\n';
             }
@@ -173,7 +186,7 @@ int main(int argc, const char * argv[])
                 counter = stoi(parse);
                 if (counter < (int)masterLog.size()) {
                     excerpt.push_back(counter);
-                    cout << "log entry " << counter << " appended" << '\n';
+                    os << "log entry " << counter << " appended" << '\n';
                 }
                 else cerr << "Error: Invalid command" << '\n';
             }
@@ -259,7 +272,7 @@ int main(int argc, const char * argv[])
                         results.push_back((intersections[0])[i]);
                     }
                 }
-                cout << counter2 << " entries found" << '\n';
+                os << counter2 << " entries found" << '\n';
                 keywords.clear();
             }
             else if (command[0] == 'c') {
@@ -286,7 +299,7 @@ int main(int argc, const char * argv[])
                     }
                 }
                 
-                cout << counter2 << " entries found" << '\n';
+                os << counter2 << " entries found" << '\n';
             }
             else if (command[0] == 't') {
                 previousSearch = false;
@@ -312,15 +325,15 @@ int main(int argc, const char * argv[])
                         results.push_back(lower - masterLog.begin());
                         results.push_back(upper - masterLog.begin());
                     }
-                    cout << counter2 << " entries found" << '\n';
+                    os << counter2 << " entries found" << '\n';
                 }
                 else cerr << "Error: Invalid command" << '\n';
             }
             else cerr << "Error: Invalid command" << '\n';
-            cout << "% ";
+            os << "% ";
             getline(cin,command);
         }
     }
-    
+    cout << os.str();
     return 0;
 }
