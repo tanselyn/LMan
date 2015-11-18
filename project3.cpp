@@ -17,14 +17,14 @@
 
 using namespace std;
 
-vector<logEntry*>::iterator lowerBoundFunc(vector<logEntry*>::iterator first,
-                                           vector<logEntry*>::iterator last, const string &val) {
-    vector<logEntry*>::iterator it;
+vector<logEntry>::iterator lowerBoundFunc(vector<logEntry>::iterator first,
+                                           vector<logEntry>::iterator last, const string &val) {
+    vector<logEntry>::iterator it;
     int count = distance(first,last);
     while (count>0)
     {
         it = first; int step=count/2; advance (it,step);
-        if ((*it)->timeStamp < val) {
+        if (it->timeStamp < val) {
             first = ++it;
             count -= step + 1;
         }
@@ -125,7 +125,7 @@ int main(int argc, const char * argv[])
             }
             else if (command[0] == 's') {
                 if (inOrder == false) {
-                    sort(excerpt.begin(),excerpt.end(),comp);
+                    sort(excerpt.begin(),excerpt.end());
                     inOrder = true;
                 }
                 cout << "excerpt list sorted" << '\n';
@@ -300,8 +300,8 @@ int main(int argc, const char * argv[])
                 string end = parse.substr(counter + 1,string::npos);
                 if (start.size() == 14 && end.size() == 14) {
                     
-                    auto lower = lower_bound(masterLog.begin(),masterLog.end(),start,comp);
-                    auto upper = lower_bound(masterLog.begin(),masterLog.end(),end,comp);
+                    auto lower = lowerBoundFunc(masterLog.begin(),masterLog.end(),start);
+                    auto upper = lowerBoundFunc(masterLog.begin(),masterLog.end(),end);
                     while (lower != upper) {
                         results.push_back(lower - masterLog.begin());
                         ++lower;
