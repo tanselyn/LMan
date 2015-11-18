@@ -81,228 +81,238 @@ int main(int argc, const char * argv[])
         
         cout << "% ";
         getline(cin,command);
-        while (command[0] != 'q') {
+        while (true) {
             
-            if (command[0] == '#') {}
-            
-            else if (command[0] == 'p') {
-                for (int i = 0; i < (int)excerpt.size(); ++i) {
-                    cout << i << "|" << masterLog[excerpt[i]].entryID << "|"
+            switch (command[0]) {
+                case '#':
+                    break;
+                case 'q':
+                    return 0;
+                case 'p':
+                    for (int i = 0; i < (int)excerpt.size(); ++i) {
+                        cout << i << "|" << masterLog[excerpt[i]].entryID << "|"
                         << masterLog[excerpt[i]].timeStamp << "|" << masterLog[excerpt[i]].
-                            category << "|" << masterLog[excerpt[i]].message << '\n';
-                }
-            }
-            else if (command[0] == 'g') {
-                if (previousSearch) {
-                    for (int i = 0; i < (int)results.size(); ++i) {
-                        cout << masterLog[results[i]].entryID << "|" << masterLog[results[i]].
-                        timeStamp << "|" << masterLog[results[i]].category << "|"
-                        << masterLog[results[i]].message << '\n';
+                        category << "|" << masterLog[excerpt[i]].message << '\n';
                     }
-                }
-                else cerr << "Error: Invalid command" << '\n';
-            }
-            else if (command[0] == 'l') {
-                inOrder = false;
-                excerpt.clear();
-                cout << "excerpt list cleared" << '\n';
-            }
-            else if (command[0] == 's') {
-                if (inOrder == false) {
-                    sort(excerpt.begin(),excerpt.end());
-                    inOrder = true;
-                }
-                cout << "excerpt list sorted" << '\n';
-            }
-            else if (command[0] == 'e') {
-                inOrder = false;
-                string parse = command.substr(2);
-                counter = stoi(parse);
-                if (counter < (int)excerpt.size()) {
-                    int move = excerpt[counter];
-                    excerpt.erase(excerpt.begin() + counter);
-                    excerpt.push_back(move);
-                    cout << "excerpt list entry " << counter << " moved" << '\n';
-                }
-                else cerr << "Error: Invalid command" << '\n';
-            }
-            else if (command[0] == 'b') {
-                inOrder = false;
-                string parse = command.substr(2);
-                counter = (int)stoi(parse);
-                if (counter < (int)excerpt.size()) {
-                    int move = excerpt[counter];
-                    excerpt.erase(excerpt.begin() + counter);
-                    excerpt.insert(excerpt.begin(),move);
-                    cout << "excerpt list entry " << counter << " moved" << '\n';
-                }
-                else cerr << "Error: Invalid command" << '\n';
-            }
-            else if (command[0] == 'd') {
-                string parse = command.substr(2);
-                counter = stoi(parse);
-                if (counter < (int)excerpt.size()) {
-                    excerpt.erase(excerpt.begin() + counter);
-                    cout << "excerpt list entry " << counter << " deleted" << '\n';
-                }
-                else cerr << "Error: Invalid command" << '\n';
-            }
-            else if (command[0] == 'r') {
-                if (previousSearch) {
-                    for (int i = 0; i < (int)results.size(); ++i) {
-                    excerpt.push_back(results[i]);
+                case 'g':
+                    if (previousSearch) {
+                        for (int i = 0; i < (int)results.size(); ++i) {
+                            cout << masterLog[results[i]].entryID << "|" << masterLog[results[i]].
+                            timeStamp << "|" << masterLog[results[i]].category << "|"
+                            << masterLog[results[i]].message << '\n';
+                        }
                     }
-                cout << results.size() << " log entries appended" << '\n';
+                    else cerr << "Error: Invalid command" << '\n';
+                    break;
+                case 'l':
+                    inOrder = false;
+                    excerpt.clear();
+                    cout << "excerpt list cleared" << '\n';
+                    break;
+                case 's':
+                    if (inOrder == false) {
+                        sort(excerpt.begin(),excerpt.end());
+                        inOrder = true;
+                    }
+                    cout << "excerpt list sorted" << '\n';
+                    break;
+                case 'e': {
+                    inOrder = false;
+                    string parse = command.substr(2);
+                    counter = stoi(parse);
+                    if (counter < (int)excerpt.size()) {
+                        int move = excerpt[counter];
+                        excerpt.erase(excerpt.begin() + counter);
+                        excerpt.push_back(move);
+                        cout << "excerpt list entry " << counter << " moved" << '\n';
+                    }
+                    else cerr << "Error: Invalid command" << '\n';
+                    break;
                 }
-                else cerr << "Error: Invalid command" << '\n';
-            }
-            else if (command[0] == 'a') {
-                inOrder = false;
-                string parse = command.substr(2);
-                counter = stoi(parse);
-                if (counter < (int)masterLog.size()) {
-                    excerpt.push_back(counter);
-                    cout << "log entry " << counter << " appended" << '\n';
+                case 'b': {
+                    inOrder = false;
+                    string parse = command.substr(2);
+                    counter = (int)stoi(parse);
+                    if (counter < (int)excerpt.size()) {
+                        int move = excerpt[counter];
+                        excerpt.erase(excerpt.begin() + counter);
+                        excerpt.insert(excerpt.begin(),move);
+                        cout << "excerpt list entry " << counter << " moved" << '\n';
+                    }
+                    else cerr << "Error: Invalid command" << '\n';
+                    break;
                 }
-                else cerr << "Error: Invalid command" << '\n';
-            }
-            else if (command[0] == 'k') {
-                previousSearch = true;
-                if (keywordSearchList.empty()) {
-                    for (int i = 0; i < (int)masterLog.size(); ++i) {
-                        auto indexFirst = masterLog[i].lowerCaseCategory.begin();
-                        auto indexLast = masterLog[i].lowerCaseCategory.begin();
-                        while ((indexFirst = find_if(indexLast,masterLog[i].lowerCaseCategory.end(),
-                                                     [](char c) {return isalnum(c);})) !=
-                               masterLog[i].lowerCaseCategory.end()) {
-                            indexLast = find_if(indexFirst,masterLog[i].lowerCaseCategory.end(),
-                                                [](char c) {return !isalnum(c);});
-                            string word(indexFirst,indexLast);
-                            
-                            if (!word.empty()) {
-                                keywordSearchList[word].push_back(i);
+                case 'd': {
+                    string parse = command.substr(2);
+                    counter = stoi(parse);
+                    if (counter < (int)excerpt.size()) {
+                        excerpt.erase(excerpt.begin() + counter);
+                        cout << "excerpt list entry " << counter << " deleted" << '\n';
+                    }
+                    else cerr << "Error: Invalid command" << '\n';
+                    break;
+                }
+                case 'r': {
+                    if (previousSearch) {
+                        for (int i = 0; i < (int)results.size(); ++i) {
+                            excerpt.push_back(results[i]);
+                        }
+                        cout << results.size() << " log entries appended" << '\n';
+                    }
+                    else cerr << "Error: Invalid command" << '\n';
+                    break;
+                }
+                case 'a': {
+                    inOrder = false;
+                    string parse = command.substr(2);
+                    counter = stoi(parse);
+                    if (counter < (int)masterLog.size()) {
+                        excerpt.push_back(counter);
+                        cout << "log entry " << counter << " appended" << '\n';
+                    }
+                    else cerr << "Error: Invalid command" << '\n';
+                    break;
+                }
+                case 'k': {
+                    previousSearch = true;
+                    if (keywordSearchList.empty()) {
+                        for (int i = 0; i < (int)masterLog.size(); ++i) {
+                            auto indexFirst = masterLog[i].lowerCaseCategory.begin();
+                            auto indexLast = masterLog[i].lowerCaseCategory.begin();
+                            while ((indexFirst = find_if(indexLast,masterLog[i].lowerCaseCategory.end(),
+                                                         [](char c) {return isalnum(c);})) !=
+                                   masterLog[i].lowerCaseCategory.end()) {
+                                indexLast = find_if(indexFirst,masterLog[i].lowerCaseCategory.end(),
+                                                    [](char c) {return !isalnum(c);});
+                                string word(indexFirst,indexLast);
                                 
+                                if (!word.empty()) {
+                                    keywordSearchList[word].push_back(i);
+                                    
+                                }
+                            }
+                            indexFirst = masterLog[i].lowerCaseMessage.begin();
+                            indexLast = masterLog[i].lowerCaseMessage.begin();
+                            while ((indexFirst = find_if(indexLast,masterLog[i].lowerCaseMessage.end(),
+                                                         [](char c) {return isalnum(c);})) !=
+                                   masterLog[i].lowerCaseMessage.end()) {
+                                indexLast = find_if(indexFirst, masterLog[i].lowerCaseMessage.end(),
+                                                    [](char c) {return !isalnum(c);});
+                                string word(indexFirst, indexLast);
+                                if (!word.empty()) {
+                                    keywordSearchList[word].push_back(i);
+                                }
                             }
                         }
-                        indexFirst = masterLog[i].lowerCaseMessage.begin();
-                        indexLast = masterLog[i].lowerCaseMessage.begin();
-                        while ((indexFirst = find_if(indexLast,masterLog[i].lowerCaseMessage.end(),
-                                                     [](char c) {return isalnum(c);})) !=
-                               masterLog[i].lowerCaseMessage.end()) {
-                            indexLast = find_if(indexFirst, masterLog[i].lowerCaseMessage.end(),
-                                                [](char c) {return !isalnum(c);});
-                            string word(indexFirst, indexLast);
-                            if (!word.empty()) {
-                                keywordSearchList[word].push_back(i);
-                            }
+                    }
+                    results.clear();
+                    counter2 = 0;
+                    string parse = command.substr(2);
+                    deque<vector<int>> intersections;
+                    
+                    auto indexFirst = parse.begin();
+                    auto indexLast = parse.begin();
+                    while ((indexFirst = find_if(indexLast,parse.end(),[](char c) {return isalnum(c);}))
+                           != parse.end()) {
+                        indexLast = find_if(indexFirst,parse.end(),[](char c) {return !isalnum(c);});
+                        string word(indexFirst,indexLast);
+                        for (int i = 0; i < (int)word.size(); ++i) {
+                            word[i] = tolower(word[i]);
                         }
+                        keywords.push_back(word);
                     }
-                }
-                results.clear();
-                counter2 = 0;
-                string parse = command.substr(2);
-                deque<vector<int>> intersections;
-                
-                auto indexFirst = parse.begin();
-                auto indexLast = parse.begin();
-                while ((indexFirst = find_if(indexLast,parse.end(),[](char c) {return isalnum(c);}))
-                       != parse.end()) {
-                    indexLast = find_if(indexFirst,parse.end(),[](char c) {return !isalnum(c);});
-                    string word(indexFirst,indexLast);
-                    for (int i = 0; i < (int)word.size(); ++i) {
-                        word[i] = tolower(word[i]);
+                    auto deleteDups = unique(keywords.begin(), keywords.end());
+                    keywords.resize(distance(keywords.begin(), deleteDups));
+                    for (int i = 0; i < (int)keywords.size(); ++i) {
+                        auto location = keywordSearchList.find(keywords[i]);
+                        if (location == keywordSearchList.end()) {
+                            break;
+                        }
+                        
+                        intersections.push_back(location->second);
                     }
-                    keywords.push_back(word);
-                }
-                auto deleteDups = unique(keywords.begin(), keywords.end());
-                keywords.resize(distance(keywords.begin(), deleteDups));
-                for (int i = 0; i < keywords.size(); ++i) {
-                    auto location = keywordSearchList.find(keywords[i]);
-                    if (location == keywordSearchList.end()) {
-                        break;
-                    }
-
-                    intersections.push_back(location->second);
-                }
-                while (intersections.size() > 1) {
-                    vector<int> temp;
-                    set_intersection(intersections.begin()->begin(),intersections.begin()->end(),
-                                     (intersections.begin() + 1)->begin(),(intersections.begin() + 1)
-                                     ->end(),back_inserter(temp));
-                    if (temp.empty()) {
-                        intersections.clear();
-                        break;
-                    }
-                    intersections.push_back(temp);
-                    intersections.pop_front();
-                    intersections.pop_front();
-                }
-                
-                if (!intersections.empty()) {
-                    auto newEnd = unique(intersections.begin()->begin(),intersections.
-                                         begin()->end());
-                    intersections.begin()->resize(distance(intersections.begin()->begin(),newEnd));
-                    counter2 = (int)intersections.begin()->size();
-                    for (int i = 0; i < (int)intersections.begin()->size(); ++i) {
-                        results.push_back((intersections[0])[i]);
-                    }
-                }
-                cout << counter2 << " entries found" << '\n';
-                keywords.clear();
-            }
-            else if (command[0] == 'c') {
-                previousSearch = true;
-                auto location = categorySearchList.begin();
-                if (categorySearchList.empty()) {
-                    for (int i = 0; i < (int)masterLog.size(); ++i) {
-                        categorySearchList[masterLog[i].lowerCaseCategory].push_back(i);
+                    while (intersections.size() > 1) {
+                        vector<int> temp;
+                        set_intersection(intersections.begin()->begin(),intersections.begin()->end(),
+                                         (intersections.begin() + 1)->begin(),(intersections.begin() + 1)
+                                         ->end(),back_inserter(temp));
+                        if (temp.empty()) {
+                            intersections.clear();
+                            break;
+                        }
+                        intersections.push_back(temp);
+                        intersections.pop_front();
+                        intersections.pop_front();
                     }
                     
-                }
-                results.clear();
-                counter2 = 0;
-                string parse = command.substr(2);
-                for (int i = 0; i < (int)parse.size(); ++i) {
-                    parse[i] = tolower(parse[i]);
-                }
-                location = categorySearchList.find(parse);
-                if (location != categorySearchList.end()) {
-                    counter2 = (int)location->second.size();
-                    for (int i = 0; i < location->second.size(); ++i) {
-                        results.push_back(location->second[i]);
-                    }
-                }
-                
-                cout << counter2 << " entries found" << '\n';
-            }
-            else if (command[0] == 't') {
-                previousSearch = true;
-                
-                results.clear();
-                counter2 = 0;
-                string parse = command.substr(2);
-                counter = (int)parse.find('|',0);
-                string start = parse.substr(0,counter);
-                string end = parse.substr(counter + 1,string::npos);
-                if (start.size() == 14 && end.size() == 14) {
-                    
-                    auto lower = lower_bound(masterLog.begin(),masterLog.end(),start,comp2);
-                    auto upper = lower_bound(masterLog.begin(),masterLog.end(),end,comp2);
-                    while (lower != upper) {
-                        results.push_back(lower - masterLog.begin());
-                        ++lower;
-                        ++counter2;
+                    if (!intersections.empty()) {
+                        auto newEnd = unique(intersections.begin()->begin(),intersections.
+                                             begin()->end());
+                        intersections.begin()->resize(distance(intersections.begin()->begin(),newEnd));
+                        counter2 = (int)intersections.begin()->size();
+                        for (int i = 0; i < (int)intersections.begin()->size(); ++i) {
+                            results.push_back((intersections[0])[i]);
+                        }
                     }
                     cout << counter2 << " entries found" << '\n';
+                    keywords.clear();
+                    break;
                 }
-                else cerr << "Error: Invalid command" << '\n';
+                case 'c': {
+                    previousSearch = true;
+                    auto location = categorySearchList.begin();
+                    if (categorySearchList.empty()) {
+                        for (int i = 0; i < (int)masterLog.size(); ++i) {
+                            categorySearchList[masterLog[i].lowerCaseCategory].push_back(i);
+                        }
+                        
+                    }
+                    results.clear();
+                    counter2 = 0;
+                    string parse = command.substr(2);
+                    for (int i = 0; i < (int)parse.size(); ++i) {
+                        parse[i] = tolower(parse[i]);
+                    }
+                    location = categorySearchList.find(parse);
+                    if (location != categorySearchList.end()) {
+                        counter2 = (int)location->second.size();
+                        for (int i = 0; i < (int)location->second.size(); ++i) {
+                            results.push_back(location->second[i]);
+                        }
+                    }
+                    
+                    cout << counter2 << " entries found" << '\n';
+                    break;
+                }
+                case 't': {
+                    previousSearch = true;
+                    
+                    results.clear();
+                    counter2 = 0;
+                    string parse = command.substr(2);
+                    counter = (int)parse.find('|',0);
+                    string start = parse.substr(0,counter);
+                    string end = parse.substr(counter + 1,string::npos);
+                    if (start.size() == 14 && end.size() == 14) {
+                        
+                        auto lower = lower_bound(masterLog.begin(),masterLog.end(),start,comp2);
+                        auto upper = lower_bound(masterLog.begin(),masterLog.end(),end,comp2);
+                        while (lower != upper) {
+                            results.push_back(lower - masterLog.begin());
+                            ++lower;
+                            ++counter2;
+                        }
+                        cout << counter2 << " entries found" << '\n';
+                    }
+                    else cerr << "Error: Invalid command" << '\n';
+                    break;
+                }
+                
+                default: cerr << "Error: Invalid command" << '\n';
             }
-            else cerr << "Error: Invalid command" << '\n';
             cout << "% ";
             getline(cin,command);
         }
-        
-        
     }
     
     return 0;
