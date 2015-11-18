@@ -217,7 +217,7 @@ int main(int argc, const char * argv[])
                 auto deleteDups = unique(keywords.begin(), keywords.end());
                 keywords.resize(distance(keywords.begin(), deleteDups));
                 for (int i = 0; i < keywords.size(); ++i) {
-                    auto location = keywordSearchList.find(*keywords.begin());
+                    auto location = keywordSearchList.find(keywords[i]);
                     if (location == keywordSearchList.end()) {
                         break;
                     }
@@ -238,12 +238,14 @@ int main(int argc, const char * argv[])
                     intersections.pop_front();
                 }
                 
-                auto newEnd = unique(intersections.begin()->begin(),intersections.
-                                     begin()->end());
-                intersections.begin()->resize(distance(intersections.begin()->begin(),newEnd));
-                counter2 = (int)intersections.begin()->size();
-                for (int i = 0; i < (int)intersections.begin()->size(); ++i) {
-                    results.push_back((intersections[0])[i]);
+                if (!intersections.empty()) {
+                    auto newEnd = unique(intersections.begin()->begin(),intersections.
+                                         begin()->end());
+                    intersections.begin()->resize(distance(intersections.begin()->begin(),newEnd));
+                    counter2 = (int)intersections.begin()->size();
+                    for (int i = 0; i < (int)intersections.begin()->size(); ++i) {
+                        results.push_back((intersections[0])[i]);
+                    }
                 }
                 cout << counter2 << " entries found" << '\n';
                 keywords.clear();
