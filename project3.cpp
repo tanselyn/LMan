@@ -17,23 +17,6 @@
 
 using namespace std;
 
-vector<logEntry>::iterator lowerBoundFunc(vector<logEntry>::iterator first,
-                                           vector<logEntry>::iterator last, const string &val) {
-    vector<logEntry>::iterator it;
-    int count = distance(first,last);
-    while (count>0)
-    {
-        it = first; int step=count/2; advance (it,step);
-        if (it->timeStamp < val) {
-            first = ++it;
-            count -= step + 1;
-        }
-        else count = step;
-    }
-    return first;
-}
-
-
 int main(int argc, const char * argv[])
 {
     
@@ -49,7 +32,8 @@ int main(int argc, const char * argv[])
     string line;
     string command;
     logEntry next;
-    timeStampCompare comp;
+    sortCompare comp;
+    timeStampCompare comp2;
     
     vector<logEntry> masterLog;
     vector<int> excerpt;
@@ -300,8 +284,8 @@ int main(int argc, const char * argv[])
                 string end = parse.substr(counter + 1,string::npos);
                 if (start.size() == 14 && end.size() == 14) {
                     
-                    auto lower = lowerBoundFunc(masterLog.begin(),masterLog.end(),start);
-                    auto upper = lowerBoundFunc(masterLog.begin(),masterLog.end(),end);
+                    auto lower = lower_bound(masterLog.begin(),masterLog.end(),start,comp2);
+                    auto upper = lower_bound(masterLog.begin(),masterLog.end(),end,comp2);
                     while (lower != upper) {
                         results.push_back(lower - masterLog.begin());
                         ++lower;

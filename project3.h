@@ -23,7 +23,7 @@ struct logEntry {
     logEntry(): timeStamp("a"), category("a"), message("a"), entryID(0) {}
 };
 
-struct timeStampCompare {
+struct sortCompare {
     bool operator() (const logEntry &rhs, const logEntry &lhs) const {
         if (rhs.timeStamp == lhs.timeStamp) {
             if (rhs.lowerCaseCategory == lhs.lowerCaseCategory) {
@@ -35,6 +35,13 @@ struct timeStampCompare {
     }
 };
 
+struct timeStampCompare {
+    bool operator() (const std::vector<logEntry>::iterator rhs,
+                     const std::string &lhs) const {
+        return rhs->timeStamp < lhs;
+    }
+};
+ 
 std::vector<logEntry*>::iterator lowerBoundFunc(std::vector<logEntry*>::iterator first,
                                 std::vector<logEntry*>::iterator last, const std::string &val);
 
