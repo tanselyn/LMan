@@ -243,9 +243,16 @@ int main(int argc, const char * argv[])
                         break;
                     }
                     else {
+                        if (indexLast == parse.end()) {
+                            vector<int>::iterator newEnd = unique(location->
+                                                                  second.begin(),location->second.end());
+                            location->second.resize(distance(location->
+                                                             second.begin(),newEnd));
+                        }
+                        
                         sort(location->second.begin(),location->second.end());
                         if (v.empty()) {
-                            v = keywordSearchList[word];
+                            v = location->second;
                         }
                         vector<int> temp;
                         set_intersection(location->second.begin(),location->second.end(),
