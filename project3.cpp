@@ -186,7 +186,11 @@ int main(int argc, const char * argv[])
                 string parse = command.substr(2);
                 counter = stoi(parse);
                 if (counter < (int)masterLog.size()) {
-                    excerpt.push_back(counter);
+                    for (int i = 0; i < (int)masterLog.size(); ++i) {
+                        if (masterLog[i].entryID == counter) {
+                            excerpt.push_back(i);
+                        }
+                    }
                     os << "log entry " << counter << " appended" << '\n';
                 }
                 else cerr << "Error: Invalid command" << '\n';
@@ -316,11 +320,7 @@ int main(int argc, const char * argv[])
                     
                     auto lower = lower_bound(masterLog.begin(),masterLog.end(),start,comp2);
                     auto upper = lower_bound(masterLog.begin(),masterLog.end(),end,comp2);
-                    /*while (lower != upper) {
-                     results.push_back(lower - masterLog.begin());
-                     ++lower;
-                     ++counter2;
-                     }*/
+
                     if (lower != upper) {
                         counter2 = upper - lower;
                         results.push_back(lower - masterLog.begin());

@@ -41,7 +41,7 @@ struct timeStampCompare {
         return rhs->timeStamp < lhs;
     }
 };
- 
+
 std::vector<logEntry*>::iterator lowerBoundFunc(std::vector<logEntry*>::iterator first,
                                 std::vector<logEntry*>::iterator last, const std::string &val);
 
