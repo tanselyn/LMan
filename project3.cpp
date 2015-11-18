@@ -8,7 +8,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <set>
+#include <deque>
 #include <cstring>
 #include <algorithm>
 #include <cctype>
@@ -42,7 +42,7 @@ int main(int argc, const char * argv[])
     argc = argc;
     
     bool inOrder = false;
-    bool resultsInOrder = false;
+    bool previousSearch = false;
     int counter = 0;
     int counter2 = 0;
     
@@ -52,11 +52,10 @@ int main(int argc, const char * argv[])
     timeStampCompare comp;
     
     vector<logEntry> masterLog;
-    vector<logEntry*> excerpt;
-    vector<logEntry*> results;
+    vector<int> excerpt;
+    vector<int> results;
     vector<string> keywords;
     
-    vector<logEntry*> timeSearchList;
     unordered_map<string,vector<int>> categorySearchList;
     unordered_map<string,vector<int>> keywordSearchList;
     
@@ -94,6 +93,7 @@ int main(int argc, const char * argv[])
                 masterLog[i].lowerCaseMessage += tolower(masterLog[i].message[j]);
             }
         }
+        sort(masterLog.begin(),masterLog.end(),comp);
         
         cout << "% ";
         getline(cin,command);
@@ -103,21 +103,17 @@ int main(int argc, const char * argv[])
             
             else if (command[0] == 'p') {
                 for (int i = 0; i < (int)excerpt.size(); ++i) {
-                    cout << i << "|" << excerpt[i]->entryID << "|" << excerpt[i]->
-                    timeStamp << "|" << excerpt[i]->category << "|"
-                    << excerpt[i]->message << '\n';
+                    cout << i << "|" << masterLog[excerpt[i]].entryID << "|"
+                        << masterLog[excerpt[i]].timeStamp << "|" << masterLog[excerpt[i]].
+                            category << "|" << masterLog[excerpt[i]].message << '\n';
                 }
             }
             else if (command[0] == 'g') {
-                if (!results.empty()) {
-                    if (!resultsInOrder) {
-                        sort(results.begin(),results.end(),comp);
-                    }
-                    resultsInOrder = true;
+                if (previousSearch) {
                     for (int i = 0; i < (int)results.size(); ++i) {
-                        cout << results[i]->entryID << "|" << results[i]->
-                        timeStamp << "|" << results[i]->category << "|"
-                        << results[i]->message << '\n';
+                        cout << masterLog[results[i]].entryID << "|" << masterLog[results[i]].
+                        timeStamp << "|" << masterLog[results[i]].category << "|"
+                        << masterLog[results[i]].message << '\n';
                     }
                 }
                 else cerr << "Error: Invalid command" << '\n';
@@ -139,7 +135,7 @@ int main(int argc, const char * argv[])
                 string parse = command.substr(2);
                 counter = stoi(parse);
                 if (counter < (int)excerpt.size()) {
-                    logEntry* move = excerpt[counter];
+                    int move = excerpt[counter];
                     excerpt.erase(excerpt.begin() + counter);
                     excerpt.push_back(move);
                     cout << "excerpt list entry " << counter << " moved" << '\n';
@@ -151,7 +147,7 @@ int main(int argc, const char * argv[])
                 string parse = command.substr(2);
                 counter = (int)stoi(parse);
                 if (counter < (int)excerpt.size()) {
-                    logEntry* move = excerpt[counter];
+                    int move = excerpt[counter];
                     excerpt.erase(excerpt.begin() + counter);
                     excerpt.insert(excerpt.begin(),move);
                     cout << "excerpt list entry " << counter << " moved" << '\n';
@@ -168,16 +164,11 @@ int main(int argc, const char * argv[])
                 else cerr << "Error: Invalid command" << '\n';
             }
             else if (command[0] == 'r') {
-                if (!timeSearchList.empty() || !categorySearchList.empty() ||
-                    !keywordSearchList.empty()) {
-                    if (!resultsInOrder) {
-                        sort(results.begin(),results.end(),comp);
-                    }
-                    resultsInOrder = true;
+                if (previousSearch) {
                     for (int i = 0; i < (int)results.size(); ++i) {
-                        excerpt.push_back(results[i]);
+                    excerpt.push_back(results[i]);
                     }
-                    cout << results.size() << " log entries appended" << '\n';
+                cout << results.size() << " log entries appended" << '\n';
                 }
                 else cerr << "Error: Invalid command" << '\n';
             }
@@ -186,12 +177,13 @@ int main(int argc, const char * argv[])
                 string parse = command.substr(2);
                 counter = stoi(parse);
                 if (counter < (int)masterLog.size()) {
-                    excerpt.push_back(&masterLog[counter]);
+                    excerpt.push_back(counter);
                     cout << "log entry " << counter << " appended" << '\n';
                 }
                 else cerr << "Error: Invalid command" << '\n';
             }
             else if (command[0] == 'k') {
+                previousSearch = true;
                 if (keywordSearchList.empty()) {
                     for (int i = 0; i < (int)masterLog.size(); ++i) {
                         auto indexFirst = masterLog[i].lowerCaseCategory.begin();
@@ -223,10 +215,9 @@ int main(int argc, const char * argv[])
                     }
                 }
                 results.clear();
-                resultsInOrder = false;
                 counter2 = 0;
                 string parse = command.substr(2);
-                vector<int> v;
+                deque<vector<int>> intersections;
                 
                 auto indexFirst = parse.begin();
                 auto indexLast = parse.begin();
@@ -241,40 +232,40 @@ int main(int argc, const char * argv[])
                 }
                 auto deleteDups = unique(keywords.begin(), keywords.end());
                 keywords.resize(distance(keywords.begin(), deleteDups));
-                for (int i = 0; i < (int)keywords.size(); ++i) {
-                    auto location = keywordSearchList.find(keywords[i]);
+                for (int i = 0; i < keywords.size(); ++i) {
+                    auto location = keywordSearchList.find(*keywords.begin());
                     if (location == keywordSearchList.end()) {
-                        v.clear();
                         break;
                     }
-                    else {
-                        if (indexLast == parse.end()) {
-                            vector<int>::iterator newEnd = unique(location->
-                                                                  second.begin(),location->second.end());
-                            location->second.resize(distance(location->
-                                                             second.begin(),newEnd));
-                        }
-                        
-                        sort(location->second.begin(),location->second.end());
-                        if (v.empty()) {
-                            v = location->second;
-                        }
-                        vector<int> temp;
-                        set_intersection(location->second.begin(),location->second.end(),
-                                         v.begin(),v.end(),back_inserter(temp));
-                        v = temp;
-                        if (v.empty()) break;
+
+                    intersections.push_back(location->second);
+                }
+                while (intersections.size() > 1) {
+                    vector<int> temp;
+                    set_intersection(intersections.begin()->begin(),intersections.begin()->end(),
+                                     (intersections.begin() + 1)->begin(),(intersections.begin() + 1)
+                                     ->end(),back_inserter(temp));
+                    if (temp.empty()) {
+                        intersections.clear();
+                        break;
                     }
+                    intersections.push_back(temp);
+                    intersections.pop_front();
+                    intersections.pop_front();
                 }
                 
-                counter2 = (int)v.size();
-                for (int a : v) {
-                    results.push_back(&masterLog[a]);
+                auto newEnd = unique(intersections.begin()->begin(),intersections.
+                                     begin()->end());
+                intersections.begin()->resize(distance(intersections.begin()->begin(),newEnd));
+                counter2 = (int)intersections.begin()->size();
+                for (int i = 0; i < (int)intersections.begin()->size(); ++i) {
+                    results.push_back((intersections[0])[i]);
                 }
                 cout << counter2 << " entries found" << '\n';
                 keywords.clear();
             }
             else if (command[0] == 'c') {
+                previousSearch = true;
                 auto location = categorySearchList.begin();
                 if (categorySearchList.empty()) {
                     for (int i = 0; i < (int)masterLog.size(); ++i) {
@@ -283,7 +274,6 @@ int main(int argc, const char * argv[])
                     
                 }
                 results.clear();
-                resultsInOrder = false;
                 counter2 = 0;
                 string parse = command.substr(2);
                 for (int i = 0; i < (int)parse.size(); ++i) {
@@ -292,23 +282,17 @@ int main(int argc, const char * argv[])
                 location = categorySearchList.find(parse);
                 if (location != categorySearchList.end()) {
                     counter2 = (int)location->second.size();
-                    for (auto a : location->second) {
-                        results.push_back(&masterLog[a]);
+                    for (int i = 0; i < location->second.size(); ++i) {
+                        results.push_back(location->second[i]);
                     }
                 }
                 
                 cout << counter2 << " entries found" << '\n';
             }
             else if (command[0] == 't') {
-                if (timeSearchList.empty()) {
-                    for (int i = 0; i < (int)masterLog.size(); ++i) {
-                        timeSearchList.push_back(&masterLog[i]);
-                    }
-                    sort(timeSearchList.begin(),timeSearchList.end(),comp);
-                }
+                previousSearch = true;
                 
                 results.clear();
-                resultsInOrder = true;
                 counter2 = 0;
                 string parse = command.substr(2);
                 counter = (int)parse.find('|',0);
@@ -316,13 +300,10 @@ int main(int argc, const char * argv[])
                 string end = parse.substr(counter + 1,string::npos);
                 if (start.size() == 14 && end.size() == 14) {
                     
-                    vector<logEntry*>::iterator lower = lowerBoundFunc(timeSearchList.begin(),
-                                                                       timeSearchList.end(), start);
-                    
-                    vector<logEntry*>::iterator upper = lowerBoundFunc(timeSearchList.begin(),
-                                                                       timeSearchList.end(), end);
+                    auto lower = lower_bound(masterLog.begin(),masterLog.end(),start,comp);
+                    auto upper = lower_bound(masterLog.begin(),masterLog.end(),end,comp);
                     while (lower != upper) {
-                        results.push_back(*lower);
+                        results.push_back(lower - masterLog.begin());
                         ++lower;
                         ++counter2;
                     }
