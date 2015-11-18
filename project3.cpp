@@ -165,9 +165,10 @@ int main(int argc, const char * argv[])
                 if (timeSearch) {
                     if (!results.empty()) {
                         os << results[1] - results[0] << " log entries appended" << '\n';
-                        while (results[0] != results [1]) {
-                            excerpt.push_back(results[0]);
-                            ++results[0];
+                        counter = results[0];
+                        while (counter != results [1]) {
+                            excerpt.push_back(counter);
+                            ++counter;
                         }
                     }
                     else os << results.size() << " log entries appended" << '\n';
