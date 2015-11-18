@@ -237,7 +237,12 @@ int main(int argc, const char * argv[])
                     for (int i = 0; i < (int)word.size(); ++i) {
                         word[i] = tolower(word[i]);
                     }
-                    auto location = keywordSearchList.find(word);
+                    keywords.push_back(word);
+                }
+                auto deleteDups = unique(keywords.begin(), keywords.end());
+                keywords.resize(distance(keywords.begin(), deleteDups));
+                for (int i = 0; i < keywords.size(); ++i) {
+                    auto location = keywordSearchList.find(keywords[i]);
                     if (location == keywordSearchList.end()) {
                         v.clear();
                         break;
