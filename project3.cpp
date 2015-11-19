@@ -28,11 +28,11 @@ int main(int argc, const char * argv[])
     ostringstream os;
     
     vector<logEntry> masterLog;
-    vector<unsigned int> excerpt;
-    vector<unsigned int> results;
+    deque<unsigned int> excerpt;
+    deque<unsigned int> results;
     
-    unordered_map<string,vector<unsigned int>> categorySearchList;
-    unordered_map<string,vector<unsigned int>> keywordSearchList;
+    unordered_map<string,deque<unsigned int>> categorySearchList;
+    unordered_map<string,deque<unsigned int>> keywordSearchList;
     
     sortCompare comp;
     timeStampCompare comp2;
@@ -146,7 +146,7 @@ int main(int argc, const char * argv[])
                     if (counter > 0) {
                         unsigned int move = excerpt[counter];
                         excerpt.erase(excerpt.begin() + counter);
-                        excerpt.insert(excerpt.begin(),move);
+                        excerpt.push_front(move);
                     }
                     os << "excerpt list entry " << counter << " moved" << '\n';
                 }
@@ -232,7 +232,7 @@ int main(int argc, const char * argv[])
                 results.clear();
                 counter2 = 0;
                 string parse(command,2,string::npos);
-                deque<vector<unsigned int>> intersections;
+                deque<deque<unsigned int>> intersections;
                 
                 auto indexFirst = parse.begin();
                 auto indexLast = parse.begin();
@@ -256,7 +256,7 @@ int main(int argc, const char * argv[])
                     intersections.push_back(location->second);
                 }
                 while (intersections.size() > 1) {
-                    vector<unsigned int> temp;
+                    deque<unsigned int> temp;
                     set_intersection(intersections.begin()->begin(),intersections.begin()->end(),
                                      (intersections.begin() + 1)->begin(),(intersections.begin() + 1)
                                      ->end(),back_inserter(temp));
