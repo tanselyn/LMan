@@ -10,7 +10,6 @@
 #include <unordered_map>
 #include <vector>
 #include <deque>
-#include <cstring>
 #include <algorithm>
 #include <cctype>
 #include <iterator>
@@ -31,8 +30,8 @@ int main(int argc, const char * argv[])
     vector<unsigned int> excerpt;
     vector<unsigned int> results;
     
-    unordered_map<string,vector<unsigned int>> categorySearchList;
-    unordered_map<string,vector<unsigned int>> keywordSearchList;
+    unordered_map<string*,vector<unsigned int>> categorySearchList;
+    unordered_map<string*,vector<unsigned int>> keywordSearchList;
     
     sortCompare comp;
     timeStampCompare comp2;
@@ -212,7 +211,7 @@ int main(int argc, const char * argv[])
                             string word(indexFirst,indexLast);
                             
                             if (!word.empty()) {
-                                keywordSearchList[word].push_back(i);
+                                keywordSearchList[&word].push_back(i);
                             }
                         }
                         indexFirst = masterLog[i].lowerCaseMessage.begin();
@@ -224,7 +223,7 @@ int main(int argc, const char * argv[])
                                                 [](char c) {return !isalnum(c);});
                             string word(indexFirst, indexLast);
                             if (!word.empty()) {
-                                keywordSearchList[word].push_back(i);
+                                keywordSearchList[&word].push_back(i);
                             }
                         }
                     }
@@ -248,7 +247,7 @@ int main(int argc, const char * argv[])
                 auto deleteDups = unique(keywords.begin(), keywords.end());
                 keywords.resize(distance(keywords.begin(), deleteDups));
                 for (int i = 0; i < (int)keywords.size(); ++i) {
-                    auto location = keywordSearchList.find(keywords[i]);
+                    auto location = keywordSearchList.find(&keywords[i]);
                     if (location == keywordSearchList.end()) {
                         resultsExist = false;
                         break;
@@ -286,7 +285,7 @@ int main(int argc, const char * argv[])
                 auto location = categorySearchList.begin();
                 if (categorySearchList.empty()) {
                     for (int i = 0; i < (int)masterLog.size(); ++i) {
-                        categorySearchList[masterLog[i].lowerCaseCategory].push_back(i);
+                        categorySearchList[&masterLog[i].lowerCaseCategory].push_back(i);
                     }
                 }
                 results.clear();
@@ -295,7 +294,7 @@ int main(int argc, const char * argv[])
                 for (int i = 0; i < (int)parse.size(); ++i) {
                     parse[i] = tolower(parse[i]);
                 }
-                location = categorySearchList.find(parse);
+                location = categorySearchList.find(&parse);
                 if (location != categorySearchList.end()) {
                     counter2 = location->second.size();
                     for (int i = 0; i < (int)location->second.size(); ++i) {

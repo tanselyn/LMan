@@ -18,9 +18,10 @@ struct logEntry {
     std::string lowerCaseCategory;
     std::string lowerCaseMessage;
     
-    int entryID;
+    unsigned int entryID;
     
-    logEntry(): timeStamp("a"), category("a"), message("a"), entryID(0) {}
+    logEntry(std::string a, std::string b, std::string c, unsigned int d):
+            timeStamp(a), category(b), message(c), entryID(d) {}
 };
 
 struct sortCompare {
@@ -42,6 +43,6 @@ struct timeStampCompare {
 };
 
 std::vector<logEntry*>::iterator lowerBoundFunc(std::vector<logEntry*>::iterator first,
-                                std::vector<logEntry*>::iterator last, const std::string &val);
+                                                std::vector<logEntry*>::iterator last, const std::string &val);
 
 #endif
