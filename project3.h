@@ -36,9 +36,8 @@ struct sortCompare {
 };
 
 struct timeStampCompare {
-    bool operator() (const std::vector<logEntry>::iterator rhs,
-                     const std::string &lhs) const {
-        return rhs->timeStamp < lhs;
+    bool operator() (const logEntry &rhs, const std::string &lhs) const {
+        return rhs.timeStamp < lhs;
     }
 };
 

@@ -27,19 +27,6 @@ int main(int argc, const char * argv[])
     
     ostringstream os;
     
-    bool inOrder = false;
-    bool previousSearch = false;
-    bool timeSearch = false;
-    bool resultsExist = true;
-    int counter = 0;
-    int counter2 = 0;
-    
-    string line;
-    string command;
-    logEntry next;
-    sortCompare comp;
-    timeStampCompare comp2;
-    
     vector<logEntry> masterLog;
     vector<int> excerpt;
     vector<int> results;
@@ -47,6 +34,21 @@ int main(int argc, const char * argv[])
     unordered_map<string,vector<int>> categorySearchList;
     unordered_map<string,vector<int>> keywordSearchList;
     
+    logEntry next;
+    sortCompare comp;
+    timeStampCompare comp2;
+    
+    string line;
+    string command;
+
+    int counter = 0;
+    int counter2 = 0;
+    
+    bool inOrder = false;
+    bool previousSearch = false;
+    bool timeSearch = false;
+    bool resultsExist = true;
+        
     if (strcmp(argv[1],"--help") == 0|| strcmp(argv[1],"-h") == 0) {
         os << "Use this program to do a variety of search, sort,"
         << " and move operations to a log file" << '\n';
@@ -86,7 +88,7 @@ int main(int argc, const char * argv[])
         os << "% ";
         getline(cin,command);
         while (true) {
-            
+    
             if (command[0] == 'q') break;
             else if (command[0] == '#') {}
             else if (command[0] == 'p') {
@@ -163,7 +165,7 @@ int main(int argc, const char * argv[])
             }
             else if (command[0] == 'r') {
                 if (timeSearch) {
-                    if (!results.empty()) {
+                        if (!results.empty()) {
                         os << results[1] - results[0] << " log entries appended" << '\n';
                         counter = results[0];
                         while (counter != results [1]) {
@@ -198,28 +200,28 @@ int main(int argc, const char * argv[])
             else if (command[0] == 'k') {
                 previousSearch = true;
                 timeSearch = false;
+                resultsExist = true;
                 vector<string> keywords;
                 if (keywordSearchList.empty()) {
                     for (int i = 0; i < (int)masterLog.size(); ++i) {
                         auto indexFirst = masterLog[i].lowerCaseCategory.begin();
                         auto indexLast = masterLog[i].lowerCaseCategory.begin();
                         while ((indexFirst = find_if(indexLast,masterLog[i].lowerCaseCategory.end(),
-                                                     [](char c) {return isalnum(c);})) !=
-                               masterLog[i].lowerCaseCategory.end()) {
+                                                    [](char c) {return isalnum(c);})) !=
+                                                    masterLog[i].lowerCaseCategory.end()) {
                             indexLast = find_if(indexFirst,masterLog[i].lowerCaseCategory.end(),
                                                 [](char c) {return !isalnum(c);});
                             string word(indexFirst,indexLast);
                             
                             if (!word.empty()) {
                                 keywordSearchList[word].push_back(i);
-                                
                             }
                         }
                         indexFirst = masterLog[i].lowerCaseMessage.begin();
                         indexLast = masterLog[i].lowerCaseMessage.begin();
                         while ((indexFirst = find_if(indexLast,masterLog[i].lowerCaseMessage.end(),
-                                                     [](char c) {return isalnum(c);})) !=
-                               masterLog[i].lowerCaseMessage.end()) {
+                                                    [](char c) {return isalnum(c);})) !=
+                                                    masterLog[i].lowerCaseMessage.end()) {
                             indexLast = find_if(indexFirst, masterLog[i].lowerCaseMessage.end(),
                                                 [](char c) {return !isalnum(c);});
                             string word(indexFirst, indexLast);
@@ -237,7 +239,7 @@ int main(int argc, const char * argv[])
                 auto indexFirst = parse.begin();
                 auto indexLast = parse.begin();
                 while ((indexFirst = find_if(indexLast,parse.end(),[](char c) {return isalnum(c);}))
-                       != parse.end()) {
+                        != parse.end()) {
                     indexLast = find_if(indexFirst,parse.end(),[](char c) {return !isalnum(c);});
                     string word(indexFirst,indexLast);
                     for (int i = 0; i < (int)word.size(); ++i) {
@@ -253,14 +255,13 @@ int main(int argc, const char * argv[])
                         resultsExist = false;
                         break;
                     }
-                    
                     intersections.push_back(location->second);
                 }
                 while (intersections.size() > 1) {
                     vector<int> temp;
                     set_intersection(intersections.begin()->begin(),intersections.begin()->end(),
-                                     (intersections.begin() + 1)->begin(),(intersections.begin() + 1)
-                                     ->end(),back_inserter(temp));
+                                        (intersections.begin() + 1)->begin(),(intersections.begin() + 1)
+                                         ->end(),back_inserter(temp));
                     if (temp.empty()) {
                         resultsExist = false;
                         break;
@@ -272,7 +273,7 @@ int main(int argc, const char * argv[])
                 
                 if (resultsExist) {
                     auto newEnd = unique(intersections.begin()->begin(),intersections.
-                                         begin()->end());
+                                             begin()->end());
                     intersections.begin()->resize(distance(intersections.begin()->begin(),newEnd));
                     counter2 = (int)intersections.begin()->size();
                     for (int i = 0; i < (int)intersections.begin()->size(); ++i) {
@@ -280,7 +281,6 @@ int main(int argc, const char * argv[])
                     }
                 }
                 os << counter2 << " entries found" << '\n';
-                keywords.clear();
             }
             else if (command[0] == 'c') {
                 previousSearch = true;
@@ -290,7 +290,6 @@ int main(int argc, const char * argv[])
                     for (int i = 0; i < (int)masterLog.size(); ++i) {
                         categorySearchList[masterLog[i].lowerCaseCategory].push_back(i);
                     }
-                    
                 }
                 results.clear();
                 counter2 = 0;
@@ -322,7 +321,7 @@ int main(int argc, const char * argv[])
                     
                     auto lower = lower_bound(masterLog.begin(),masterLog.end(),start,comp2);
                     auto upper = lower_bound(masterLog.begin(),masterLog.end(),end,comp2);
-
+                    
                     if (lower != upper) {
                         counter2 = upper - lower;
                         results.push_back(lower - masterLog.begin());
