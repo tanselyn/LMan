@@ -31,17 +31,11 @@ int main(int argc, const char * argv[])
     deque<unsigned int> excerpt;
     deque<unsigned int> results;
     
-    unordered_map<string,deque<unsigned int>> categorySearchList;
-    unordered_map<string,deque<unsigned int>> keywordSearchList;
+    unordered_map<string,vector<unsigned int>> categorySearchList;
+    unordered_map<string,vector<unsigned int>> keywordSearchList;
     
     sortCompare comp;
     timeStampCompare comp2;
-    
-    string line;
-    string command;
-    
-    unsigned int counter = 0;
-    unsigned int counter2 = 0;
     
     bool inOrder = false;
     bool previousSearch = false;
@@ -58,9 +52,10 @@ int main(int argc, const char * argv[])
         ifstream myFile(argv[1]);
         
         if (myFile.is_open()) {
+            string line;
             while (getline(myFile,line)) {
-                counter = line.find_first_of('|',0);
-                counter2 = line.find_last_of('|');
+                int counter = line.find_first_of('|',0);
+                int counter2 = line.find_last_of('|');
                 logEntry next(string(line,0,counter),string(line,counter + 1,counter2 - counter - 1),string(line,counter2 + 1,(int)string::npos),masterLog.size());
                 
                 masterLog.push_back(next);
@@ -79,6 +74,7 @@ int main(int argc, const char * argv[])
         }
         sort(masterLog.begin(),masterLog.end(),comp);
         
+        string command;
         os << "% ";
         getline(cin,command);
         while (true) {
@@ -127,7 +123,7 @@ int main(int argc, const char * argv[])
             else if (command[0] == 'e') {
                 inOrder = false;
                 string parse(command,2,string::npos);
-                counter = stoi(parse);
+                unsigned int counter = stoi(parse);
                 if (counter < excerpt.size()) {
                     if (counter < excerpt.size() - 1) {
                         unsigned int move = excerpt[counter];
@@ -141,7 +137,7 @@ int main(int argc, const char * argv[])
             else if (command[0] == 'b') {
                 inOrder = false;
                 string parse(command,2,string::npos);
-                counter = stoi(parse);
+                unsigned int counter = stoi(parse);
                 if (counter < excerpt.size()) {
                     if (counter > 0) {
                         unsigned int move = excerpt[counter];
@@ -154,7 +150,7 @@ int main(int argc, const char * argv[])
             }
             else if (command[0] == 'd') {
                 string parse(command,2,string::npos);
-                counter = stoi(parse);
+                unsigned int counter = stoi(parse);
                 if (counter < excerpt.size()) {
                     excerpt.erase(excerpt.begin() + counter);
                     os << "excerpt list entry " << counter << " deleted" << '\n';
@@ -165,7 +161,7 @@ int main(int argc, const char * argv[])
                 if (timeSearch) {
                     if (!results.empty()) {
                         os << results[1] - results[0] << " log entries appended" << '\n';
-                        counter = results[0];
+                        unsigned int counter = results[0];
                         while (counter != results[1]) {
                             excerpt.push_back(counter);
                             ++counter;
@@ -184,7 +180,7 @@ int main(int argc, const char * argv[])
             else if (command[0] == 'a') {
                 inOrder = false;
                 string parse(command,2,string::npos);
-                counter = stoi(parse);
+                unsigned counter = stoi(parse);
                 if (counter < masterLog.size()) {
                     for (unsigned int i = 0; i < masterLog.size(); ++i) {
                         if (masterLog[i].entryID == counter) {
@@ -230,9 +226,8 @@ int main(int argc, const char * argv[])
                     }
                 }
                 results.clear();
-                counter2 = 0;
                 string parse(command,2,string::npos);
-                deque<deque<unsigned int>> intersections;
+                deque<vector<unsigned int>> intersections;
                 
                 auto indexFirst = parse.begin();
                 auto indexLast = parse.begin();
@@ -256,7 +251,7 @@ int main(int argc, const char * argv[])
                     intersections.push_back(location->second);
                 }
                 while (intersections.size() > 1) {
-                    deque<unsigned int> temp;
+                    vector<unsigned int> temp;
                     set_intersection(intersections.begin()->begin(),intersections.begin()->end(),
                                      (intersections.begin() + 1)->begin(),(intersections.begin() + 1)
                                      ->end(),back_inserter(temp));
@@ -268,7 +263,7 @@ int main(int argc, const char * argv[])
                     intersections.pop_front();
                     intersections.pop_front();
                 }
-                
+                int counter2 = 0;
                 if (resultsExist) {
                     auto newEnd = unique(intersections.begin()->begin(),intersections.
                                          begin()->end());
@@ -290,7 +285,7 @@ int main(int argc, const char * argv[])
                     }
                 }
                 results.clear();
-                counter2 = 0;
+                unsigned int counter2 = 0;
                 string parse(command,2,string::npos);
                 for (int i = 0; i < (int)parse.size(); ++i) {
                     parse[i] = tolower(parse[i]);
@@ -310,9 +305,9 @@ int main(int argc, const char * argv[])
                 timeSearch = true;
                 
                 results.clear();
-                counter2 = 0;
+                unsigned int counter2 = 0;
                 string parse(command,2,string::npos);
-                counter = parse.find('|',0);
+                int counter = parse.find('|',0);
                 string start(parse,0,counter);
                 string end(parse,counter + 1,string::npos);
                 if (start.size() == 14 && end.size() == 14) {
