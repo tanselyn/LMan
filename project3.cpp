@@ -30,6 +30,7 @@ int main(int argc, const char * argv[])
     bool inOrder = false;
     bool previousSearch = false;
     bool timeSearch = false;
+    bool resultsExist = true;
     int counter = 0;
     int counter2 = 0;
     
@@ -42,7 +43,6 @@ int main(int argc, const char * argv[])
     vector<logEntry> masterLog;
     vector<int> excerpt;
     vector<int> results;
-    vector<string> keywords;
     
     unordered_map<string,vector<int>> categorySearchList;
     unordered_map<string,vector<int>> keywordSearchList;
@@ -198,6 +198,7 @@ int main(int argc, const char * argv[])
             else if (command[0] == 'k') {
                 previousSearch = true;
                 timeSearch = false;
+                vector<string> keywords;
                 if (keywordSearchList.empty()) {
                     for (int i = 0; i < (int)masterLog.size(); ++i) {
                         auto indexFirst = masterLog[i].lowerCaseCategory.begin();
@@ -249,6 +250,7 @@ int main(int argc, const char * argv[])
                 for (int i = 0; i < (int)keywords.size(); ++i) {
                     auto location = keywordSearchList.find(keywords[i]);
                     if (location == keywordSearchList.end()) {
+                        resultsExist = false;
                         break;
                     }
                     
@@ -260,7 +262,7 @@ int main(int argc, const char * argv[])
                                      (intersections.begin() + 1)->begin(),(intersections.begin() + 1)
                                      ->end(),back_inserter(temp));
                     if (temp.empty()) {
-                        intersections.clear();
+                        resultsExist = false;
                         break;
                     }
                     intersections.push_back(temp);
@@ -268,7 +270,7 @@ int main(int argc, const char * argv[])
                     intersections.pop_front();
                 }
                 
-                if (!intersections.empty()) {
+                if (resultsExist) {
                     auto newEnd = unique(intersections.begin()->begin(),intersections.
                                          begin()->end());
                     intersections.begin()->resize(distance(intersections.begin()->begin(),newEnd));
