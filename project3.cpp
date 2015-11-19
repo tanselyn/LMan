@@ -34,7 +34,6 @@ int main(int argc, const char * argv[])
     unordered_map<string,vector<unsigned int>> categorySearchList;
     unordered_map<string,vector<unsigned int>> keywordSearchList;
     
-    logEntry next;
     sortCompare comp;
     timeStampCompare comp2;
     
@@ -60,12 +59,9 @@ int main(int argc, const char * argv[])
         
         if (myFile.is_open()) {
             while (getline(myFile,line)) {
-                counter = line.find('|',0);
-                next.timeStamp = line.substr(0, counter);
-                counter2 = line.find('|',counter + 1);
-                next.category = line.substr(counter + 1,counter2 - counter - 1);
-                next.message = line.substr(counter2 + 1,string::npos);
-                next.entryID = masterLog.size();
+                counter = line.find_first_of('|',0);
+                counter2 = line.find_last_of('|');
+                logEntry next(string(line,0,counter),string(line,counter + 1,counter2 - counter - 1),string(line,counter2 + 1,(int)string::npos),masterLog.size());
                 
                 masterLog.push_back(next);
                 
@@ -130,7 +126,7 @@ int main(int argc, const char * argv[])
             }
             else if (command[0] == 'e') {
                 inOrder = false;
-                string parse = command.substr(2);
+                string parse(command,2,string::npos);
                 counter = stoi(parse);
                 if (counter < excerpt.size()) {
                     if (counter < excerpt.size() - 1) {
@@ -144,7 +140,7 @@ int main(int argc, const char * argv[])
             }
             else if (command[0] == 'b') {
                 inOrder = false;
-                string parse = command.substr(2);
+                string parse(command,2,string::npos);
                 counter = stoi(parse);
                 if (counter < excerpt.size()) {
                     if (counter > 0) {
@@ -157,7 +153,7 @@ int main(int argc, const char * argv[])
                 else cerr << "Error: Invalid command" << '\n';
             }
             else if (command[0] == 'd') {
-                string parse = command.substr(2);
+                string parse(command,2,string::npos);
                 counter = stoi(parse);
                 if (counter < excerpt.size()) {
                     excerpt.erase(excerpt.begin() + counter);
@@ -187,7 +183,7 @@ int main(int argc, const char * argv[])
             }
             else if (command[0] == 'a') {
                 inOrder = false;
-                string parse = command.substr(2);
+                string parse(command,2,string::npos);
                 counter = stoi(parse);
                 if (counter < masterLog.size()) {
                     for (unsigned int i = 0; i < masterLog.size(); ++i) {
@@ -235,7 +231,7 @@ int main(int argc, const char * argv[])
                 }
                 results.clear();
                 counter2 = 0;
-                string parse = command.substr(2);
+                string parse(command,2,string::npos);
                 deque<vector<unsigned int>> intersections;
                 
                 auto indexFirst = parse.begin();
@@ -295,7 +291,7 @@ int main(int argc, const char * argv[])
                 }
                 results.clear();
                 counter2 = 0;
-                string parse = command.substr(2);
+                string parse(command,2,string::npos);
                 for (int i = 0; i < (int)parse.size(); ++i) {
                     parse[i] = tolower(parse[i]);
                 }
@@ -315,10 +311,10 @@ int main(int argc, const char * argv[])
                 
                 results.clear();
                 counter2 = 0;
-                string parse = command.substr(2);
+                string parse(command,2,string::npos);
                 counter = parse.find('|',0);
-                string start = parse.substr(0,counter);
-                string end = parse.substr(counter + 1,string::npos);
+                string start(parse,0,counter);
+                string end(parse,counter + 1,string::npos);
                 if (start.size() == 14 && end.size() == 14) {
                     
                     auto lower = lower_bound(masterLog.begin(),masterLog.end(),start,comp2);
