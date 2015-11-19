@@ -28,11 +28,11 @@ int main(int argc, const char * argv[])
     ostringstream os;
     
     vector<logEntry> masterLog;
-    vector<int> excerpt;
-    vector<int> results;
+    vector<unsigned int> excerpt;
+    vector<unsigned int> results;
     
-    unordered_map<string,vector<int>> categorySearchList;
-    unordered_map<string,vector<int>> keywordSearchList;
+    unordered_map<string,vector<unsigned int>> categorySearchList;
+    unordered_map<string,vector<unsigned int>> keywordSearchList;
     
     logEntry next;
     sortCompare comp;
@@ -41,8 +41,8 @@ int main(int argc, const char * argv[])
     string line;
     string command;
     
-    int counter = 0;
-    int counter2 = 0;
+    unsigned int counter = 0;
+    unsigned int counter2 = 0;
     
     bool inOrder = false;
     bool previousSearch = false;
@@ -60,12 +60,12 @@ int main(int argc, const char * argv[])
         
         if (myFile.is_open()) {
             while (getline(myFile,line)) {
-                counter = (int)line.find('|',0);
+                counter = line.find('|',0);
                 next.timeStamp = line.substr(0, counter);
-                counter2 = (int)line.find('|',counter + 1);
+                counter2 = line.find('|',counter + 1);
                 next.category = line.substr(counter + 1,counter2 - counter - 1);
                 next.message = line.substr(counter2 + 1,string::npos);
-                next.entryID = (int)masterLog.size();
+                next.entryID = masterLog.size();
                 
                 masterLog.push_back(next);
                 
@@ -132,9 +132,9 @@ int main(int argc, const char * argv[])
                 inOrder = false;
                 string parse = command.substr(2);
                 counter = stoi(parse);
-                if (counter < (int)excerpt.size()) {
-                    if (counter < (int)excerpt.size() - 1) {
-                        int move = excerpt[counter];
+                if (counter < excerpt.size()) {
+                    if (counter < excerpt.size() - 1) {
+                        unsigned int move = excerpt[counter];
                         excerpt.erase(excerpt.begin() + counter);
                         excerpt.push_back(move);
                     }
@@ -145,10 +145,10 @@ int main(int argc, const char * argv[])
             else if (command[0] == 'b') {
                 inOrder = false;
                 string parse = command.substr(2);
-                counter = (int)stoi(parse);
-                if (counter < (int)excerpt.size()) {
+                counter = stoi(parse);
+                if (counter < excerpt.size()) {
                     if (counter > 0) {
-                        int move = excerpt[counter];
+                        unsigned int move = excerpt[counter];
                         excerpt.erase(excerpt.begin() + counter);
                         excerpt.insert(excerpt.begin(),move);
                     }
@@ -159,7 +159,7 @@ int main(int argc, const char * argv[])
             else if (command[0] == 'd') {
                 string parse = command.substr(2);
                 counter = stoi(parse);
-                if (counter < (int)excerpt.size()) {
+                if (counter < excerpt.size()) {
                     excerpt.erase(excerpt.begin() + counter);
                     os << "excerpt list entry " << counter << " deleted" << '\n';
                 }
@@ -170,7 +170,7 @@ int main(int argc, const char * argv[])
                     if (!results.empty()) {
                         os << results[1] - results[0] << " log entries appended" << '\n';
                         counter = results[0];
-                        while (counter != results [1]) {
+                        while (counter != results[1]) {
                             excerpt.push_back(counter);
                             ++counter;
                         }
@@ -189,8 +189,8 @@ int main(int argc, const char * argv[])
                 inOrder = false;
                 string parse = command.substr(2);
                 counter = stoi(parse);
-                if (counter < (int)masterLog.size()) {
-                    for (int i = 0; i < (int)masterLog.size(); ++i) {
+                if (counter < masterLog.size()) {
+                    for (unsigned int i = 0; i < masterLog.size(); ++i) {
                         if (masterLog[i].entryID == counter) {
                             excerpt.push_back(i);
                         }
@@ -236,7 +236,7 @@ int main(int argc, const char * argv[])
                 results.clear();
                 counter2 = 0;
                 string parse = command.substr(2);
-                deque<vector<int>> intersections;
+                deque<vector<unsigned int>> intersections;
                 
                 auto indexFirst = parse.begin();
                 auto indexLast = parse.begin();
@@ -260,7 +260,7 @@ int main(int argc, const char * argv[])
                     intersections.push_back(location->second);
                 }
                 while (intersections.size() > 1) {
-                    vector<int> temp;
+                    vector<unsigned int> temp;
                     set_intersection(intersections.begin()->begin(),intersections.begin()->end(),
                                      (intersections.begin() + 1)->begin(),(intersections.begin() + 1)
                                      ->end(),back_inserter(temp));
@@ -277,7 +277,7 @@ int main(int argc, const char * argv[])
                     auto newEnd = unique(intersections.begin()->begin(),intersections.
                                          begin()->end());
                     intersections.begin()->resize(distance(intersections.begin()->begin(),newEnd));
-                    counter2 = (int)intersections.begin()->size();
+                    counter2 = intersections.begin()->size();
                     for (int i = 0; i < (int)intersections.begin()->size(); ++i) {
                         results.push_back((intersections[0])[i]);
                     }
@@ -301,7 +301,7 @@ int main(int argc, const char * argv[])
                 }
                 location = categorySearchList.find(parse);
                 if (location != categorySearchList.end()) {
-                    counter2 = (int)location->second.size();
+                    counter2 = location->second.size();
                     for (int i = 0; i < (int)location->second.size(); ++i) {
                         results.push_back(location->second[i]);
                     }
@@ -316,7 +316,7 @@ int main(int argc, const char * argv[])
                 results.clear();
                 counter2 = 0;
                 string parse = command.substr(2);
-                counter = (int)parse.find('|',0);
+                counter = parse.find('|',0);
                 string start = parse.substr(0,counter);
                 string end = parse.substr(counter + 1,string::npos);
                 if (start.size() == 14 && end.size() == 14) {
