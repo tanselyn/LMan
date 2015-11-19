@@ -16,7 +16,6 @@ struct logEntry {
     std::string category;
     std::string message;
     std::string lowerCaseCategory;
-    std::string lowerCaseMessage;
     
     unsigned int entryID;
     

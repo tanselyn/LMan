@@ -69,8 +69,6 @@ int main(int argc, const char * argv[])
         for (int i = 0; i < (int)masterLog.size(); ++i) {
             transform (masterLog[i].category.begin(),masterLog[i].category.end(),
                        back_inserter(masterLog[i].lowerCaseCategory),::tolower);
-            transform (masterLog[i].message.begin(),masterLog[i].message.end(),
-                       back_inserter(masterLog[i].lowerCaseMessage),::tolower);
         }
         sort(masterLog.begin(),masterLog.end(),comp);
         
@@ -195,7 +193,6 @@ int main(int argc, const char * argv[])
                 previousSearch = true;
                 timeSearch = false;
                 resultsExist = true;
-                vector<string> keywords;
                 if (keywordSearchList.empty()) {
                     for (int i = 0; i < (int)masterLog.size(); ++i) {
                         auto indexFirst = masterLog[i].lowerCaseCategory.begin();
@@ -211,15 +208,16 @@ int main(int argc, const char * argv[])
                                 keywordSearchList[word].push_back(i);
                             }
                         }
-                        indexFirst = masterLog[i].lowerCaseMessage.begin();
-                        indexLast = masterLog[i].lowerCaseMessage.begin();
-                        while ((indexFirst = find_if(indexLast,masterLog[i].lowerCaseMessage.end(),
+                        indexFirst = masterLog[i].message.begin();
+                        indexLast = masterLog[i].message.begin();
+                        while ((indexFirst = find_if(indexLast,masterLog[i].message.end(),
                                                      [](char c) {return isalnum(c);})) !=
-                               masterLog[i].lowerCaseMessage.end()) {
-                            indexLast = find_if(indexFirst, masterLog[i].lowerCaseMessage.end(),
+                               masterLog[i].message.end()) {
+                            indexLast = find_if(indexFirst, masterLog[i].message.end(),
                                                 [](char c) {return !isalnum(c);});
                             string word(indexFirst, indexLast);
                             if (!word.empty()) {
+                                transform (indexFirst,indexLast,word.begin(),::tolower);
                                 keywordSearchList[word].push_back(i);
                             }
                         }
@@ -235,15 +233,8 @@ int main(int argc, const char * argv[])
                        != parse.end()) {
                     indexLast = find_if(indexFirst,parse.end(),[](char c) {return !isalnum(c);});
                     string word(indexFirst,indexLast);
-                    for (int i = 0; i < (int)word.size(); ++i) {
-                        word[i] = tolower(word[i]);
-                    }
-                    keywords.push_back(word);
-                }
-                auto deleteDups = unique(keywords.begin(), keywords.end());
-                keywords.resize(distance(keywords.begin(), deleteDups));
-                for (int i = 0; i < (int)keywords.size(); ++i) {
-                    auto location = keywordSearchList.find(keywords[i]);
+                    transform(indexFirst,indexLast,word.begin(),::tolower);
+                    auto location = keywordSearchList.find(word);
                     if (location == keywordSearchList.end()) {
                         resultsExist = false;
                         break;
