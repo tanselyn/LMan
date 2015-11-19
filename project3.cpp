@@ -134,7 +134,7 @@ int main(int argc, const char * argv[])
                 inOrder = false;
                 string parse = command.substr(2);
                 counter = stoi(parse);
-                if (counter < (int)excerpt.size()) {
+                if (counter < (int)excerpt.size() - 1) {
                     int move = excerpt[counter];
                     excerpt.erase(excerpt.begin() + counter);
                     excerpt.push_back(move);
@@ -146,7 +146,7 @@ int main(int argc, const char * argv[])
                 inOrder = false;
                 string parse = command.substr(2);
                 counter = (int)stoi(parse);
-                if (counter < (int)excerpt.size()) {
+                if (counter < (int)excerpt.size() && counter > 0) {
                     int move = excerpt[counter];
                     excerpt.erase(excerpt.begin() + counter);
                     excerpt.insert(excerpt.begin(),move);
