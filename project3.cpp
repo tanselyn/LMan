@@ -40,7 +40,7 @@ int main(int argc, const char * argv[])
     
     string line;
     string command;
-
+    
     int counter = 0;
     int counter2 = 0;
     
@@ -48,7 +48,7 @@ int main(int argc, const char * argv[])
     bool previousSearch = false;
     bool timeSearch = false;
     bool resultsExist = true;
-        
+    
     if (strcmp(argv[1],"--help") == 0|| strcmp(argv[1],"-h") == 0) {
         os << "Use this program to do a variety of search, sort,"
         << " and move operations to a log file" << '\n';
@@ -76,19 +76,17 @@ int main(int argc, const char * argv[])
         os << masterLog.size() << " entries read" << '\n';
         
         for (int i = 0; i < (int)masterLog.size(); ++i) {
-            for (int j = 0; j < (int)masterLog[i].category.size(); ++j) {
-                masterLog[i].lowerCaseCategory += tolower(masterLog[i].category[j]);
-            }
-            for (int j = 0; j < (int)masterLog[i].message.size(); ++j) {
-                masterLog[i].lowerCaseMessage += tolower(masterLog[i].message[j]);
-            }
+            transform (masterLog[i].category.begin(),masterLog[i].category.end(),
+                       back_inserter(masterLog[i].lowerCaseCategory),::tolower);
+            transform (masterLog[i].message.begin(),masterLog[i].message.end(),
+                       back_inserter(masterLog[i].lowerCaseMessage),::tolower);
         }
         sort(masterLog.begin(),masterLog.end(),comp);
         
         os << "% ";
         getline(cin,command);
         while (true) {
-    
+            
             if (command[0] == 'q') break;
             else if (command[0] == '#') {}
             else if (command[0] == 'p') {
@@ -169,7 +167,7 @@ int main(int argc, const char * argv[])
             }
             else if (command[0] == 'r') {
                 if (timeSearch) {
-                        if (!results.empty()) {
+                    if (!results.empty()) {
                         os << results[1] - results[0] << " log entries appended" << '\n';
                         counter = results[0];
                         while (counter != results [1]) {
@@ -211,8 +209,8 @@ int main(int argc, const char * argv[])
                         auto indexFirst = masterLog[i].lowerCaseCategory.begin();
                         auto indexLast = masterLog[i].lowerCaseCategory.begin();
                         while ((indexFirst = find_if(indexLast,masterLog[i].lowerCaseCategory.end(),
-                                                    [](char c) {return isalnum(c);})) !=
-                                                    masterLog[i].lowerCaseCategory.end()) {
+                                                     [](char c) {return isalnum(c);})) !=
+                               masterLog[i].lowerCaseCategory.end()) {
                             indexLast = find_if(indexFirst,masterLog[i].lowerCaseCategory.end(),
                                                 [](char c) {return !isalnum(c);});
                             string word(indexFirst,indexLast);
@@ -224,8 +222,8 @@ int main(int argc, const char * argv[])
                         indexFirst = masterLog[i].lowerCaseMessage.begin();
                         indexLast = masterLog[i].lowerCaseMessage.begin();
                         while ((indexFirst = find_if(indexLast,masterLog[i].lowerCaseMessage.end(),
-                                                    [](char c) {return isalnum(c);})) !=
-                                                    masterLog[i].lowerCaseMessage.end()) {
+                                                     [](char c) {return isalnum(c);})) !=
+                               masterLog[i].lowerCaseMessage.end()) {
                             indexLast = find_if(indexFirst, masterLog[i].lowerCaseMessage.end(),
                                                 [](char c) {return !isalnum(c);});
                             string word(indexFirst, indexLast);
@@ -243,7 +241,7 @@ int main(int argc, const char * argv[])
                 auto indexFirst = parse.begin();
                 auto indexLast = parse.begin();
                 while ((indexFirst = find_if(indexLast,parse.end(),[](char c) {return isalnum(c);}))
-                        != parse.end()) {
+                       != parse.end()) {
                     indexLast = find_if(indexFirst,parse.end(),[](char c) {return !isalnum(c);});
                     string word(indexFirst,indexLast);
                     for (int i = 0; i < (int)word.size(); ++i) {
@@ -264,8 +262,8 @@ int main(int argc, const char * argv[])
                 while (intersections.size() > 1) {
                     vector<int> temp;
                     set_intersection(intersections.begin()->begin(),intersections.begin()->end(),
-                                        (intersections.begin() + 1)->begin(),(intersections.begin() + 1)
-                                         ->end(),back_inserter(temp));
+                                     (intersections.begin() + 1)->begin(),(intersections.begin() + 1)
+                                     ->end(),back_inserter(temp));
                     if (temp.empty()) {
                         resultsExist = false;
                         break;
@@ -277,7 +275,7 @@ int main(int argc, const char * argv[])
                 
                 if (resultsExist) {
                     auto newEnd = unique(intersections.begin()->begin(),intersections.
-                                             begin()->end());
+                                         begin()->end());
                     intersections.begin()->resize(distance(intersections.begin()->begin(),newEnd));
                     counter2 = (int)intersections.begin()->size();
                     for (int i = 0; i < (int)intersections.begin()->size(); ++i) {
